@@ -5,7 +5,7 @@ import traceback
 from mcp.server.fastmcp import Context, FastMCP
 from snake.mcp.server.tools.pytest import run_pytest
 from snake.mcp.server.tools.mypy import run_mypy
-from snake.mcp.server.tools.flake8 import run_flake8
+from snake.mcp.server.tools.flake8 import Flake8Tool
 
 mcp = FastMCP("Python")
 
@@ -60,10 +60,11 @@ async def pytest(
         return await run_pytest(
             ctx, path, args, verbose, coverage, coverage_source)
     except Exception as e:
+        trace = traceback.format_exc()
         return {
             "success": False,
             "data": None,
-            "error": f"Failed to run pytest: {str(e)}\n{traceback.format_exc()}"
+            "error": f"Failed to run pytest: {str(e)}\n{trace}"
         }
 
 
@@ -109,10 +110,11 @@ async def mypy(
             ctx, path, args, disallow_untyped_defs,
             disallow_incomplete_defs, exclude)
     except Exception as e:
+        trace = traceback.format_exc()
         return {
             "success": False,
             "data": None,
-            "error": f"Failed to run mypy: {str(e)}\n{traceback.format_exc()}"
+            "error": f"Failed to run mypy: {str(e)}\n{trace}"
         }
 
 
@@ -145,11 +147,5 @@ async def flake8(
             "error": str | None  # Error message if failure
         }
     """
-    try:
-        return await run_flake8(ctx, path, args, max_line_length)
-    except Exception as e:
-        return {
-            "success": False,
-            "data": None,
-            "error": f"Failed to run flake8: {str(e)}\n{traceback.format_exc()}"
-        }
+    flake8_tool = Flake8Tool()
+    return await flake8_tool.run(ctx, path, args, max_line_length)
