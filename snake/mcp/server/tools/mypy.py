@@ -14,34 +14,14 @@ async def run_mypy(
         disallow_incomplete_defs: bool = False,
         exclude: list[str] | None = None) -> dict[str, Any]:
     """Run mypy type checker on a Python project.
-
-    Executes mypy type checker on the specified project path.
-
-    Args:
-        ctx: MCP context
-        path: Path to a Python project
-        args: Optional list of additional arguments to pass to mypy
-        disallow_untyped_defs: Whether to disallow functions without type
-            annotations
-        disallow_incomplete_defs: Whether to disallow functions with partial
-            type annotations
-        exclude: Optional list of directories/files to exclude from type
-            checking
-
-    Returns:
-        A dictionary with the operation results
     """
-    # Validate the path exists
     project_path = pathlib.Path(path)
     if not project_path.exists():
         raise FileNotFoundError(f"Path '{path}' does not exist")
 
-    # Build the command
     mypy_cmd = ["mypy"]
-    # Check if mypy.ini exists in the project root and use it
     config_path = pathlib.Path(path) / "mypy.ini"
     if not config_path.exists():
-        # Try to find mypy.ini in parent directories
         parent_path = pathlib.Path(path).parent
         parent_config = parent_path / "mypy.ini"
         if parent_config.exists():
@@ -50,11 +30,9 @@ async def run_mypy(
     if config_path.exists():
         mypy_cmd.extend(["--config-file", str(config_path)])
 
-    # Add exclude directories if specified
     if exclude:
         for exclude_path in exclude:
             mypy_cmd.append(f"--exclude={exclude_path}")
-    # Default exclude tests/ directory if not explicitly checking tests
     elif not pathlib.Path(path).name == "tests":
         try:
             if os.path.isdir(os.path.join(path, "tests")):
@@ -62,18 +40,13 @@ async def run_mypy(
         except (FileNotFoundError, PermissionError):
             pass
 
-    # Add disallow_untyped_defs if specified
     if disallow_untyped_defs:
         mypy_cmd.append("--disallow-untyped-defs")
-    # Add disallow_incomplete_defs if specified
     if disallow_incomplete_defs:
         mypy_cmd.append("--disallow-incomplete-defs")
-    # Add any additional user arguments
     if args:
         mypy_cmd.extend(args)
-    # Add the path
     mypy_cmd.append(path)
-    # Run mypy with arguments
     process = await asyncio.create_subprocess_exec(
         *mypy_cmd,
         stdout=asyncio.subprocess.PIPE,
@@ -107,5 +80,4 @@ async def run_mypy(
             "error": None
         }
     else:
-        # Actual error running mypy
         raise RuntimeError(f"mypy failed: {stderr_output}")
