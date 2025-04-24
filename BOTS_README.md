@@ -12,3 +12,5 @@ The MCP components in this repository are designed to integrate with these stand
 * MUST end all files with a newline
 * MUST NOT add unnecessary typing imports and should instead use modern typing hints
 * SHOULD move any files to a directory called waste if you want to delete them
+* MUST NOT add backwards compatibility unless explicitly told
+* MUST NOT add workarounds/placeholders or other non-production code unless explicitly told
