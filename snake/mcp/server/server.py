@@ -1,10 +1,8 @@
 """MCP server tools for Python."""
 
-import traceback
-
 from mcp.server.fastmcp import Context, FastMCP
-from snake.mcp.server.tools.pytest import run_pytest
-from snake.mcp.server.tools.mypy import run_mypy
+from snake.mcp.server.tools.pytest import PytestTool
+from snake.mcp.server.tools.mypy import MypyTool
 from snake.mcp.server.tools.flake8 import Flake8Tool
 
 mcp = FastMCP("Python")
@@ -56,16 +54,9 @@ async def pytest(
             "error": str | None  # Error message if failure
         }
     """
-    try:
-        return await run_pytest(
-            ctx, path, args, verbose, coverage, coverage_source)
-    except Exception as e:
-        trace = traceback.format_exc()
-        return {
-            "success": False,
-            "data": None,
-            "error": f"Failed to run pytest: {str(e)}\n{trace}"
-        }
+    pytest_tool = PytestTool()
+    return await pytest_tool.run(
+        ctx, path, args, verbose, coverage, coverage_source)
 
 
 @mcp.tool()
@@ -105,17 +96,10 @@ async def mypy(
             "error": str | None  # Error message if failure
         }
     """
-    try:
-        return await run_mypy(
-            ctx, path, args, disallow_untyped_defs,
-            disallow_incomplete_defs, exclude)
-    except Exception as e:
-        trace = traceback.format_exc()
-        return {
-            "success": False,
-            "data": None,
-            "error": f"Failed to run mypy: {str(e)}\n{trace}"
-        }
+    mypy_tool = MypyTool()
+    return await mypy_tool.run(
+        ctx, path, args, disallow_untyped_defs,
+        disallow_incomplete_defs, exclude)
 
 
 @mcp.tool()
