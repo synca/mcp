@@ -27,7 +27,8 @@ class Tool:
             return await self.handle(*args, **kwargs)
         except Exception as e:
             trace = traceback.format_exc()
-            error_msg = f"Failed to run tool: {str(e)}\n{trace}"
+            tool_name = self.__class__.__name__.lower().replace("tool", "")
+            error_msg = f"Failed to run {tool_name}: {str(e)}\n{trace}"
             return {
                 "success": False,
                 "data": None,
