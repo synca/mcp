@@ -1,0 +1,163 @@
+"""Test file for updated base.py implementation."""
+
+import pathlib
+import pytest
+from unittest.mock import MagicMock, patch
+
+from snake.mcp.server.tools.base import Tool
+
+
+def test_tool_init():
+    """Test Tool constructor with various parameters."""
+    # Test with no parameters
+    tool = Tool()
+    assert tool._ctx is None
+    assert tool._path_str is None
+    assert tool._validated_path is None
+    
+    # Test with parameters
+    ctx = MagicMock()
+    path = "/test/path"
+    tool = Tool(ctx=ctx, path=path)
+    assert tool._ctx is ctx
+    assert tool._path_str == path
+    assert tool._validated_path is None
+
+
+def test_tool_ctx_property():
+    """Test the ctx property getter."""
+    # Test when ctx is set
+    ctx = MagicMock()
+    tool = Tool(ctx=ctx)
+    assert tool.ctx is ctx
+    
+    # Test when ctx is not set
+    tool_no_ctx = Tool()
+    with pytest.raises(ValueError) as e:
+        _ = tool_no_ctx.ctx
+    assert e.value.args[0] == "Context is not set"
+
+
+@pytest.mark.parametrize("exists", [True, False])
+def test_tool_path_property(exists):
+    """Test the path property getter."""
+    with patch("pathlib.Path") as mock_path_class:
+        # Configure the mock
+        mock_path_obj = MagicMock()
+        mock_path_obj.exists.return_value = exists
+        mock_path_class.return_value = mock_path_obj
+        
+        # Create tool instance with path
+        path_str = "/test/path"
+        tool = Tool(path=path_str)
+        
+        if exists:
+            # Test successful path access
+            assert tool.path is mock_path_obj
+            
+            # Test caching behavior
+            _ = tool.path  # Second access
+            assert mock_path_class.call_count == 1  # Should be called only once
+        else:
+            # Test validation failure
+            with pytest.raises(FileNotFoundError) as e:
+                _ = tool.path
+            assert e.value.args[0] == f"Path '{path_str}' does not exist"
+        
+        # Verify mock calls
+        assert mock_path_class.call_args == [(path_str,), {}]
+        assert mock_path_obj.exists.called
+
+
+def test_tool_path_property_not_set():
+    """Test behavior when path is not set."""
+    tool = Tool()
+    with pytest.raises(ValueError) as e:
+        _ = tool.path
+    assert e.value.args[0] == "Path is not set"
+
+
+@pytest.mark.asyncio
+async def test_tool_handle():
+    """Test handle method raises NotImplementedError."""
+    tool = Tool()
+    with pytest.raises(NotImplementedError):
+        await tool.handle()
+
+
+@pytest.mark.parametrize("error", [None, Exception("Test error")])
+@pytest.mark.parametrize("with_ctx_path", [True, False])
+@pytest.mark.asyncio
+async def test_tool_run(error, with_ctx_path):
+    """Test run method with error handling and ctx/path options."""
+    # Create mocks
+    ctx_init = MagicMock(name="ctx_init")
+    ctx_run = MagicMock(name="ctx_run")
+    path_init = "/test/path_init"
+    path_run = "/test/path_run"
+    
+    # Create instance with initial ctx/path
+    tool = Tool(ctx=ctx_init, path=path_init)
+    if with_ctx_path:
+        run_ctx, run_path = ctx_run, path_run
+    else:
+        run_ctx, run_path = None, None
+    
+    # Setup test arguments
+    kwargs = {"key1": "value1", "key2": "value2"}
+    
+    # Configure mocks for patching
+    mock_validate = MagicMock()
+    mock_handle = MagicMock()
+    mock_tb = MagicMock(return_value="Traceback output")
+    
+    if error:
+        mock_validate.side_effect = error
+    
+    # Set expected output
+    expected_success = {
+        "success": True,
+        "data": {"message": "Success!"},
+        "error": None
+    }
+    mock_handle.return_value = expected_success
+    
+    # Expected error output
+    expected_error = {
+        "success": False,
+        "data": None,
+        "error": f"Failed to run custom: {error}\nTraceback output"
+    }
+    
+    # Execute with patches
+    with patch.object(Tool, "validate_path", mock_validate), \
+         patch.object(Tool, "handle", mock_handle), \
+         patch("traceback.format_exc", mock_tb):
+        
+        # Set class name for error message test
+        tool.__class__.__name__ = "CustomTool"
+        
+        # Run the method
+        result = await tool.run(ctx=run_ctx, path=run_path, **kwargs)
+    
+    # Verify ctx/path were updated correctly
+    if with_ctx_path:
+        assert tool._ctx is ctx_run
+        assert tool._path_str == path_run
+    else:
+        assert tool._ctx is ctx_init
+        assert tool._path_str == path_init
+    
+    # Verify the validation occurred
+    assert mock_validate.called
+    
+    # Check results based on error
+    if error:
+        assert result == expected_error
+        assert not mock_handle.called
+        assert mock_tb.called
+    else:
+        assert result == expected_success
+        assert mock_handle.called
+        # Check handle was called with correct kwargs
+        assert mock_handle.call_args == [(), kwargs]

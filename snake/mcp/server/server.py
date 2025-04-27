@@ -12,32 +12,25 @@ mcp = FastMCP("Python")
 
 @mcp.tool()
 async def pytest(
-        ctx: Context, path: str,
-        args: list[str] | None = None,
-        verbose: bool = False,
-        coverage: bool = False,
-        coverage_source: str | None = None) -> dict:
+        ctx: Context,
+        path: str,
+        pytest_args: list[str] | None = None) -> dict:
     """Run pytest on a Python project
 
     Executes pytest test runner on the specified project path.
 
     Args:
-        path: Path to a Python project
-        args: Optional list of additional arguments to pass to pytest
-             Examples: ["-xvs", "--cov=mypackage", "--no-cov-on-fail"]
-        verbose: Whether to run pytest in verbose mode (-v)
-        coverage: Whether to run with coverage reporting
-        coverage_source: Source directory or package to measure coverage for
-             Example: "mypackage" or "src"
+        path: Directory path from which to run pytest (working directory)
+        pytest_args: Optional list of additional arguments to pass to pytest
 
     Returns:
         A dictionary with the following structure:
         {
-            "success": bool,  # Whether operation completed successfully
-            "data": {        # Present only if success is True
-                "message": str,  # Summary
-                "output": str,   # Output
-                "project_path": str,  # Path
+            "success": bool,
+            "data": {
+                "message": str,
+                "output": str,
+                "project_path": str,
                 "test_summary": {
                     "total": int,
                     "passed": int,
@@ -46,90 +39,75 @@ async def pytest(
                     "xfailed": int,
                     "xpassed": int
                 },
-                "coverage": {  # Present only if coverage=True and successful
-                    "total": float,  # Total coverage percentage
-                    "by_file": dict  # Coverage by file
+                "coverage": {
+                    "total": float,
+                    "by_file": dict
                 }
             },
-            "error": str | None  # Error message if failure
+            "error": str | None
         }
     """
-    pytest_tool = PytestTool()
-    return await pytest_tool.run(
-        ctx, path, args, verbose, coverage, coverage_source)
+    return await PytestTool(ctx, path).run(args=pytest_args)
 
 
 @mcp.tool()
 async def mypy(
-        ctx: Context, path: str,
-        args: list[str] | None = None,
-        disallow_untyped_defs: bool = False,
-        disallow_incomplete_defs: bool = False,
-        exclude: list[str] | None = None) -> dict:
+        ctx: Context,
+        path: str,
+        mypy_args: list[str] | None = None) -> dict:
     """Run mypy type checker on a Python project
 
     Executes mypy type checker on the specified project path.
 
     Args:
-        path: Path to a Python project
-        args: Optional list of additional arguments to pass to mypy
-             Examples: ["--no-implicit-optional"]
-        disallow_untyped_defs: Whether to disallow functions without type
-            annotations
-        disallow_incomplete_defs: Whether to disallow functions with partial
-            type annotations
-        exclude: Optional list of directories/files to exclude from type
-            checking
-             Example: ["tests/"]
+        path: Directory path from which to run mypy (working directory)
+        mypy_args: Optional list of additional arguments to pass to mypy
+             Examples: ["--no-implicit-optional", "--disallow-untyped-defs",
+                        "--disallow-incomplete-defs"]
 
     Returns:
         A dictionary with the following structure:
         {
-            "success": bool,  # Whether operation completed successfully
-            "data": {        # Present only if success is True
+            "success": bool,
+            "data": {
                 "message": str,
                 "output": str,
                 "project_path": str,
                 "issues_count": int,
                 "has_issues": bool
             },
-            "error": str | None  # Error message if failure
+            "error": str | None
         }
     """
-    mypy_tool = MypyTool()
-    return await mypy_tool.run(
-        ctx, path, args, disallow_untyped_defs,
-        disallow_incomplete_defs, exclude)
+    return await MypyTool(ctx, path).run(args=mypy_args)
 
 
 @mcp.tool()
 async def flake8(
         ctx: Context, path: str,
-        args: list[str] | None = None,
-        max_line_length: int | None = None) -> dict:
+        flake8_args: list[str] | None = None) -> dict:
     """Run flake8 linter on a Python project
 
     Executes flake8 linter on the specified project path.
 
     Args:
-        path: Path to a Python project
-        args: Optional list of additional arguments to pass to flake8
+        path: Directory path from which to run flake8 (working directory)
+        flake8_args: Optional list of additional arguments to pass to flake8
              Examples: ["--ignore=E203", "--exclude=.git"]
-        max_line_length: Optional maximum line length to enforce
 
     Returns:
         A dictionary with the following structure:
         {
-            "success": bool,  # Whether operation completed successfully
-            "data": {        # Present only if success is True
+            "success": bool,
+            "data": {
                 "message": str,
                 "output": str,
                 "project_path": str,
                 "issues_count": int,
                 "has_issues": bool
             },
-            "error": str | None  # Error message if failure
+            "error": str | None
         }
+
     """
-    flake8_tool = Flake8Tool()
-    return await flake8_tool.run(ctx, path, args, max_line_length)
+    return await Flake8Tool(ctx, path).run(args=flake8_args)
