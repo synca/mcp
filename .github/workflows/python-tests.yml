@@ -6,77 +6,17 @@ on:
   pull_request:
     branches: [ "main" ]
 
+permissions:
+  contents: read
+
 jobs:
-  flake8:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.12"
-
-    - name: Install dependencies
-      working-directory: ./synca.mcp.python
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install -e .
-
-    - name: Lint with flake8
-      working-directory: ./synca.mcp.python
-      run: |
-        # stop the build if there are Python syntax errors or undefined names
-        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
-        # full run with configured settings
-        flake8 .
-
-  mypy:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.12"
-
-    - name: Install dependencies
-      working-directory: ./synca.mcp.python
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install -e .
-
-    - name: Type check with mypy
-      working-directory: ./synca.mcp.python
-      run: |
-        mypy .
-
-  coverage:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python 3.12
-      uses: actions/setup-python@v4
-      with:
-        python-version: "3.12"
-
-    - name: Install dependencies
-      working-directory: ./synca.mcp.python
-      run: |
-        python -m pip install --upgrade pip
-        python -m pip install -e .
-
-    - name: Test with coverage
-      working-directory: ./synca.mcp.python
-      run: |
-        pytest --cov-report=xml --cov-report=term
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-      with:
-        token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
-        fail_ci_if_error: false
-        flags: unittests
-        name: codecov-umbrella
-        verbose: true
-        working-directory: ./synca.mcp.python
+  python-tests:
+    strategy:
+      matrix:
+        module: [synca.mcp.python]
+      fail-fast: false
+    
+    uses: ./.github/workflows/_python_test.yml
+    with:
+      module_path: ${{ matrix.module }}
+    secrets: inherit
