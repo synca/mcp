@@ -1,12 +1,12 @@
-"""Isolated tests for snake.mcp.server.tools.base."""
+"""Isolated tests for synca.mcp.python.tool.base."""
 
 import pytest
 from unittest.mock import AsyncMock, MagicMock, PropertyMock
 
-from snake.mcp.server.tools.base import Tool
+from synca.mcp.python.tool.base import Tool
 
 
-def test_tools_base_constructor():
+def test_tool_base_constructor():
     """Test Tool class initialization."""
     ctx = MagicMock()
     path = MagicMock()
@@ -18,7 +18,7 @@ def test_tools_base_constructor():
         tool.tool_name
 
 
-def test_tools_base_path(patches):
+def test_tool_base_path(patches):
     """Test Tool path."""
     ctx = MagicMock()
     path = MagicMock()
@@ -26,7 +26,7 @@ def test_tools_base_path(patches):
     patched = patches(
         "pathlib",
         "Tool.validate_path",
-        prefix="snake.mcp.server.tools.base")
+        prefix="synca.mcp.python.tool.base")
 
     with patched as (m_path, m_valid):
         assert (
@@ -42,7 +42,7 @@ def test_tools_base_path(patches):
     assert "path" in tool.__dict__
 
 
-def test_tools_base_tool_path(patches):
+def test_tool_base_tool_path(patches):
     """Test Tool path."""
     ctx = MagicMock()
     path = MagicMock()
@@ -50,7 +50,7 @@ def test_tools_base_tool_path(patches):
     patched = patches(
         ("Tool.tool_name",
          dict(new_callable=PropertyMock)),
-        prefix="snake.mcp.server.tools.base")
+        prefix="synca.mcp.python.tool.base")
 
     with patched as (m_name, ):
         assert (
@@ -63,7 +63,7 @@ def test_tools_base_tool_path(patches):
     [None,
      [MagicMock()],
      [MagicMock(), MagicMock()]])
-def test_tools_base_command(patches, args):
+def test_tool_base_command(patches, args):
     """Test command with parametrized arguments."""
     path = "/test/path"
     ctx = MagicMock()
@@ -72,7 +72,7 @@ def test_tools_base_command(patches, args):
     patched = patches(
         ("Tool.tool_path",
          dict(new_callable=PropertyMock)),
-        prefix="snake.mcp.server.tools.base")
+        prefix="synca.mcp.python.tool.base")
 
     with patched as (m_tool_path, ):
         assert (
@@ -83,7 +83,7 @@ def test_tools_base_command(patches, args):
 
 
 @pytest.mark.asyncio
-async def test_tools_base_execute(patches):
+async def test_tool_base_execute(patches):
     """Test execute method."""
     cmd = (MagicMock(), MagicMock(), MagicMock())
     ctx = MagicMock()
@@ -96,7 +96,7 @@ async def test_tools_base_execute(patches):
         "str",
         ("Tool.path",
          dict(new_callable=PropertyMock)),
-        prefix="snake.mcp.server.tools.base")
+        prefix="synca.mcp.python.tool.base")
 
     with patched as (m_aio, m_str, m_path):
         m_subproc = m_aio.create_subprocess_exec = AsyncMock()
@@ -122,7 +122,7 @@ async def test_tools_base_execute(patches):
 
 @pytest.mark.parametrize("args", [None, ["--ignore=E501"]])
 @pytest.mark.asyncio
-async def test_tools_base_handle(patches, args):
+async def test_tool_base_handle(patches, args):
     """Test handle method with various parameters."""
     ctx = MagicMock()
     path = MagicMock()
@@ -132,7 +132,7 @@ async def test_tools_base_handle(patches, args):
         "Tool.execute",
         "Tool.parse_output",
         "Tool.result",
-        prefix="snake.mcp.server.tools.base")
+        prefix="synca.mcp.python.tool.base")
 
     with patched as (m_build, m_exec, m_parse, m_format):
         m_exec.return_value = (MagicMock(), MagicMock(), MagicMock())
@@ -155,7 +155,7 @@ async def test_tools_base_handle(patches, args):
         == [m_parse.return_value, {}])
 
 
-def test_tools_base_parse_output(patches):
+def test_tool_base_parse_output(patches):
     """Test parse_output method."""
     ctx = MagicMock()
     path = MagicMock()
@@ -166,7 +166,7 @@ def test_tools_base_parse_output(patches):
 
 
 @pytest.mark.parametrize("issues_count", [0, 1, 5])
-def test_tools_base_result(patches, issues_count):
+def test_tool_base_result(patches, issues_count):
     """Test result method with parametrized inputs."""
     ctx = MagicMock()
     path = MagicMock()
@@ -179,7 +179,7 @@ def test_tools_base_result(patches, issues_count):
          dict(new_callable=PropertyMock)),
         ("Tool.tool_name",
          dict(new_callable=PropertyMock)),
-        prefix="snake.mcp.server.tools.base")
+        prefix="synca.mcp.python.tool.base")
 
     with patched as (m_str, m_path, m_tool):
         assert (
@@ -203,11 +203,11 @@ def test_tools_base_result(patches, issues_count):
 
 
 @pytest.mark.parametrize("exists", [True, False])
-def test_tools_base_validate_path(patches, exists):
+def test_tool_base_validate_path(patches, exists):
     """Test validate_path method with parametrized path existence."""
     patched = patches(
         "pathlib.Path",
-        prefix="snake.mcp.server.tools.base")
+        prefix="synca.mcp.python.tool.base")
     ctx = MagicMock()
     path = MagicMock()
     tool = Tool(ctx, path)
@@ -242,7 +242,7 @@ def test_tools_base_validate_path(patches, exists):
      {"verbose": True},
      {}])
 @pytest.mark.asyncio
-async def test_tools_base_run(patches, iters, args, kwargs, error):
+async def test_tool_base_run(patches, iters, args, kwargs, error):
     """Test run() with parametrized arguments."""
     ctx = MagicMock()
     path = MagicMock()
@@ -251,7 +251,7 @@ async def test_tools_base_run(patches, iters, args, kwargs, error):
     patched = patches(
         "traceback",
         "Tool.handle",
-        prefix="snake.mcp.server.tools.base")
+        prefix="synca.mcp.python.tool.base")
 
     with patched as (m_tb, m_handle):
         if error:

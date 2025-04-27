@@ -2,8 +2,8 @@
 
 import re
 
-from snake.mcp.server.tools.base import Tool
-from snake.mcp.server.util.coverage import CoverageParser
+from synca.mcp.python.tool.base import Tool
+from synca.mcp.python.util.coverage import CoverageParser
 
 
 class PytestTool(Tool):

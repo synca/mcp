@@ -1,4 +1,4 @@
-"""Isolated tests for snake.mcp.server.server."""
+"""Isolated tests for synca.mcp.python.server."""
 
 import inspect
 from unittest.mock import MagicMock
@@ -6,7 +6,7 @@ from unittest.mock import MagicMock
 import pytest
 from mcp.server.fastmcp import FastMCP
 
-from snake.mcp.server import server
+from synca.mcp.python import server
 
 
 def test_fastmcp_initialization():
@@ -35,7 +35,7 @@ async def test_tool_pytest(
             kwargs[k] = v
     patched = patches(
         "PytestTool.run",
-        prefix="snake.mcp.server.server")
+        prefix="synca.mcp.python.server")
 
     with patched as (m_run, ):
         assert (
@@ -63,7 +63,7 @@ async def test_tool_mypy(patches, args):
             kwargs[k] = v
     patched = patches(
         "MypyTool.run",
-        prefix="snake.mcp.server.server")
+        prefix="synca.mcp.python.server")
 
     with patched as (m_run, ):
         assert (
@@ -90,7 +90,7 @@ async def test_tool_flake8(patches, args):
             kwargs[k] = v
     patched = patches(
         "Flake8Tool.run",
-        prefix="snake.mcp.server.server")
+        prefix="synca.mcp.python.server")
 
     with patched as (m_run, ):
         assert (

@@ -22,7 +22,7 @@ class CoverageParser:
         # Look for the coverage table format:
         # Name                           Stmts   Miss  Cover
         # --------------------------------------------------
-        # snake/__init__.py                  0      0   100%
+        # synca/__init__.py                  0      0   100%
         # TOTAL                            444     49    89%
         # Parse the coverage table from the output
         coverage_data: dict[str, float | dict[str, float]] = dict(

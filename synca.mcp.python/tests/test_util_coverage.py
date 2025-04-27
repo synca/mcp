@@ -1,10 +1,10 @@
-"""Isolated tests for snake.mcp.server.util.coverage."""
+"""Isolated tests for synca.mcp.python.util.coverage."""
 
 import pytest
 from unittest.mock import MagicMock, PropertyMock
 
 # Import the coverage module for testing
-from snake.mcp.server.util import coverage
+from synca.mcp.python.util import coverage
 
 
 def test_coverage_parsing_error():
@@ -32,7 +32,7 @@ def test_coverage_data(patches, iters):
         ("CoverageParser.table",
          dict(new_callable=PropertyMock)),
         "CoverageParser._parse_table_row",
-        prefix="snake.mcp.server.util.coverage")
+        prefix="synca.mcp.python.util.coverage")
 
     with patched as (m_dict, m_table, m_row):
         m_table.return_value = table_rows
@@ -55,8 +55,8 @@ def test_coverage_data(patches, iters):
     [(None, None),
      (("TOTAL", 89.5), {"total": 89.5}),
      (("FAIL", "FAIL MESSAGE"), {"failure": "FAIL MESSAGE"}),
-     (("snake/__init__.py", 100.0),
-      {"by_file": {"snake/__init__.py": 100.0}})])
+     (("synca/__init__.py", 100.0),
+      {"by_file": {"synca/__init__.py": 100.0}})])
 def test_parse_table_row(patches, entry, expected_update):
     """Test _parse_table_row method with parametrized inputs."""
     combined_output = MagicMock()
@@ -66,7 +66,7 @@ def test_parse_table_row(patches, entry, expected_update):
     initial_data = coverage_data.copy()
     patched = patches(
         "CoverageParser._table_entry",
-        prefix="snake.mcp.server.util.coverage")
+        prefix="synca.mcp.python.util.coverage")
 
     with patched as (m_table_entry,):
         m_table_entry.return_value = entry
@@ -119,7 +119,7 @@ def test_table(patches, iters):
     # Create patches for methods used by table
     patched = patches(
         "CoverageParser._table_row",
-        prefix="snake.mcp.server.util.coverage")
+        prefix="synca.mcp.python.util.coverage")
 
     with patched as (m_table_row,):
         m_table_row.side_effect = mock_rows + [None] * 10
@@ -186,9 +186,9 @@ def test_table_entry(patches, error, row):
       ["TOTAL", "10", "1", "90%"],
       False),
      ("", True, None, False),
-     ("snake/__init__.py        10      1    90%",
+     ("synca/__init__.py        10      1    90%",
       True,
-      ["snake/__init__.py", "10", "1", "90%"],
+      ["synca/__init__.py", "10", "1", "90%"],
       False)])
 def test_table_row(
         patches, line, in_table, expected_result, table_start_result):
@@ -199,7 +199,7 @@ def test_table_row(
     initial_in_table = in_table
     patched = patches(
         "CoverageParser._coverage_table_start",
-        prefix="snake.mcp.server.util.coverage")
+        prefix="synca.mcp.python.util.coverage")
 
     with patched as (m_table_start,):
         m_table_start.return_value = table_start_result

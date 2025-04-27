@@ -1,13 +1,13 @@
 """MCP server tools for Python."""
 
 from mcp.server.fastmcp import Context, FastMCP
-from snake.mcp.server.tools.pytest import PytestTool
-from snake.mcp.server.tools.mypy import MypyTool
-from snake.mcp.server.tools.flake8 import Flake8Tool
+from synca.mcp.python.tool.pytest import PytestTool
+from synca.mcp.python.tool.mypy import MypyTool
+from synca.mcp.python.tool.flake8 import Flake8Tool
 
 mcp = FastMCP("Python")
 
-# TOOLS
+# TOOL
 
 
 @mcp.tool()

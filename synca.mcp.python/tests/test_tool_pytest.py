@@ -1,14 +1,14 @@
-"""Isolated tests for snake.mcp.server.tools.pytest."""
+"""Isolated tests for synca.mcp.python.tool.pytest."""
 
 from unittest.mock import MagicMock
 
 import pytest
 
-from snake.mcp.server.tools.base import Tool
-from snake.mcp.server.tools.pytest import PytestTool
+from synca.mcp.python.tool.base import Tool
+from synca.mcp.python.tool.pytest import PytestTool
 
 
-def test_tools_pytest_constructor():
+def test_tool_pytest_constructor():
     """Test PytestTool class initialization."""
     ctx = MagicMock()
     path = MagicMock()
@@ -32,7 +32,7 @@ def test_tools_pytest_constructor():
      {"total": 85.0,
       "by_file": {},
       "failure": "FAIL Required coverage not reached"}])
-def test_tools_pytest_parse_output(
+def test_tool_pytest_parse_output(
         patches, stdout, stderr, returncode, coverage_data):
     """Test parse_output method with various combinations of inputs."""
     ctx = MagicMock()
@@ -63,7 +63,7 @@ def test_tools_pytest_parse_output(
          dict(return_value=test_summary)),
         ("PytestTool._parse_coverage_data",
          dict(return_value=coverage_data)),
-        prefix="snake.mcp.server.tools.pytest")
+        prefix="synca.mcp.python.tool.pytest")
 
     with patched as (m_summary, m_coverage):
         assert (
@@ -89,7 +89,7 @@ def test_tools_pytest_parse_output(
 package/__init__.py     10      2    80%   5-7
 TOTAL                   10      2    80%
 FAIL Required test coverage of 95% not reached."""])
-def test_tools_pytest_parse_coverage_data(patches, output):
+def test_tool_pytest_parse_coverage_data(patches, output):
     """Test _parse_coverage_data method with various inputs."""
     ctx = MagicMock()
     path = MagicMock()
@@ -97,7 +97,7 @@ def test_tools_pytest_parse_coverage_data(patches, output):
     has_coverage = "Required test coverage" in output
     patched = patches(
         "CoverageParser",
-        prefix="snake.mcp.server.tools.pytest")
+        prefix="synca.mcp.python.tool.pytest")
 
     with patched as (m_parser,):
         assert (
@@ -152,7 +152,7 @@ def test_tools_pytest_parse_coverage_data(patches, output):
          "total": 11, "passed": 5, "failed": 3,
          "skipped": 2, "xfailed": 1, "xpassed": 0
      })])
-def test_tools_pytest_parse_test_summary(output, expected_summary):
+def test_tool_pytest_parse_test_summary(output, expected_summary):
     """Test _parse_test_summary method with various inputs."""
     ctx = MagicMock()
     path = MagicMock()
