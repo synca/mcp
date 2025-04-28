@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from synca.mcp.python.tool.base import Tool
+from synca.mcp.common.tool import Tool
 from synca.mcp.python.tool.pytest import PytestTool
 
 
@@ -68,7 +68,7 @@ def test_tool_pytest_parse_output(
     with patched as (m_summary, m_coverage):
         assert (
             tool.parse_output(stdout, stderr, returncode)
-            == (expected_issues, expected_msg, expected_data))
+            == (returncode or 0, expected_issues, expected_msg, expected_data))
 
     assert (
         m_summary.call_args

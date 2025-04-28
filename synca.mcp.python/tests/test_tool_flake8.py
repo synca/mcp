@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, PropertyMock
 
 import pytest
 
-from synca.mcp.python.tool.base import Tool
+from synca.mcp.common.tool import Tool
 from synca.mcp.python.tool.flake8 import Flake8Tool
 
 
@@ -48,7 +48,7 @@ def test_tool_flake8_parse_output(patches, returncode, stdout, stderr):
         else:
             assert (
                 tool.parse_output(stdout, stderr, returncode)
-                == (issues_count, msg_output, {}))
+                == (returncode or 0, issues_count, msg_output, {}))
 
     if (returncode or 0) > 1:
         assert (

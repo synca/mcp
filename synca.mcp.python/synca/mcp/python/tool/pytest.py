@@ -2,7 +2,7 @@
 
 import re
 
-from synca.mcp.python.tool.base import Tool
+from synca.mcp.common.tool import Tool
 from synca.mcp.python.util.coverage import CoverageParser
 
 
@@ -17,7 +17,7 @@ class PytestTool(Tool):
             self,
             stdout: str,
             stderr: str,
-            returncode: int | None) -> tuple[int, str, dict]:
+            returncode: int | None) -> tuple[int, int, str, dict]:
         """Parse the tool output."""
         combined_output = stdout + "\n" + stderr
         data: dict[str, dict] = dict(
@@ -32,7 +32,7 @@ class PytestTool(Tool):
             "All tests passed successfully"
             if returncode == 0
             else combined_output)
-        return issues_count, message, data
+        return returncode or 0, issues_count, message, data
 
     def _parse_coverage_data(
             self,
