@@ -13,9 +13,11 @@ jobs:
   python-tests:
     strategy:
       matrix:
-        module: [synca.mcp.python]
+        module:
+        - synca.mcp.common
+        - synca.mcp.python
       fail-fast: false
-    
+
     uses: ./.github/workflows/_python_test.yml
     with:
       module_path: ${{ matrix.module }}
