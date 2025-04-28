@@ -79,17 +79,18 @@ class Tool:
             return_code: int,
             issues_count: int,
             output: str,
-            data: dict) -> ResultDict:
+            info: dict) -> ResultDict:
         """Format the final result."""
         return {
             "success": True,
             "data": {
+                "return_code": return_code,
                 "message": (
                     f"Found {issues_count} issues for {self.tool_name}"),
                 "output": output,
                 "project_path": str(self.path),
                 "issues_count": issues_count,
-                "data": data,
+                "info": info,
             },
             "error": None}
 
