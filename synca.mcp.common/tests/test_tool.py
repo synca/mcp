@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock, PropertyMock
 from synca.mcp.common.tool import Tool
 
 
-def test_tool_base_constructor():
+def test_tool_constructor():
     """Test Tool class initialization."""
     ctx = MagicMock()
     path = MagicMock()
@@ -18,7 +18,7 @@ def test_tool_base_constructor():
         tool.tool_name
 
 
-def test_tool_base_path(patches):
+def test_tool_path(patches):
     """Test Tool path."""
     ctx = MagicMock()
     path = MagicMock()
@@ -42,7 +42,7 @@ def test_tool_base_path(patches):
     assert "path" in tool.__dict__
 
 
-def test_tool_base_tool_path(patches):
+def test_tool_tool_path(patches):
     """Test Tool path."""
     ctx = MagicMock()
     path = MagicMock()
@@ -63,7 +63,7 @@ def test_tool_base_tool_path(patches):
     [None,
      [MagicMock()],
      [MagicMock(), MagicMock()]])
-def test_tool_base_command(patches, args):
+def test_tool_command(patches, args):
     """Test command with parametrized arguments."""
     path = "/test/path"
     ctx = MagicMock()
@@ -83,7 +83,7 @@ def test_tool_base_command(patches, args):
 
 
 @pytest.mark.asyncio
-async def test_tool_base_execute(patches):
+async def test_tool_execute(patches):
     """Test execute method."""
     cmd = (MagicMock(), MagicMock(), MagicMock())
     ctx = MagicMock()
@@ -122,7 +122,7 @@ async def test_tool_base_execute(patches):
 
 @pytest.mark.parametrize("args", [None, ["--ignore=E501"]])
 @pytest.mark.asyncio
-async def test_tool_base_handle(patches, args):
+async def test_tool_handle(patches, args):
     """Test handle method with various parameters."""
     ctx = MagicMock()
     path = MagicMock()
@@ -156,7 +156,7 @@ async def test_tool_base_handle(patches, args):
         == [m_parse.return_value, {}])
 
 
-def test_tool_base_parse_output(patches):
+def test_tool_parse_output(patches):
     """Test parse_output method."""
     ctx = MagicMock()
     path = MagicMock()
@@ -167,13 +167,13 @@ def test_tool_base_parse_output(patches):
 
 
 @pytest.mark.parametrize("issues_count", [0, 1, 5])
-def test_tool_base_result(patches, issues_count):
+def test_tool_result(patches, issues_count):
     """Test result method with parametrized inputs."""
     ctx = MagicMock()
     path = MagicMock()
     output = MagicMock()
     tool = Tool(ctx, path)
-    data = MagicMock()
+    info = MagicMock()
     return_code = MagicMock()
     patched = patches(
         "str",
@@ -185,17 +185,18 @@ def test_tool_base_result(patches, issues_count):
 
     with patched as (m_str, m_path, m_tool):
         assert (
-            tool.result(return_code, issues_count, output, data)
+            tool.result(return_code, issues_count, output, info)
             == {
                 "success": True,
                 "data": {
+                    "return_code": return_code,
                     "message": (
                         f"Found {issues_count} issues "
                         f"for {m_tool.return_value}"),
                     "output": output,
                     "project_path": m_str.return_value,
                     "issues_count": issues_count,
-                    "data": data,
+                    "info": info,
                 },
                 "error": None})
 
@@ -205,7 +206,7 @@ def test_tool_base_result(patches, issues_count):
 
 
 @pytest.mark.parametrize("exists", [True, False])
-def test_tool_base_validate_path(patches, exists):
+def test_tool_validate_path(patches, exists):
     """Test validate_path method with parametrized path existence."""
     patched = patches(
         "pathlib.Path",
@@ -244,7 +245,7 @@ def test_tool_base_validate_path(patches, exists):
      {"verbose": True},
      {}])
 @pytest.mark.asyncio
-async def test_tool_base_run(patches, iters, args, kwargs, error):
+async def test_tool_run(patches, iters, args, kwargs, error):
     """Test run() with parametrized arguments."""
     ctx = MagicMock()
     path = MagicMock()
