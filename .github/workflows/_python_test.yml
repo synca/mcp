@@ -2,6 +2,9 @@ name: Python module tests
 
 on:
   workflow_call:
+    secrets:
+      CODECOV_TOKEN:
+        required: false
     inputs:
       module_path:
         required: true

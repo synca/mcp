@@ -11,6 +11,8 @@ permissions:
 
 jobs:
   python-tests:
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     strategy:
       matrix:
         module:
@@ -22,4 +24,3 @@ jobs:
     uses: ./.github/workflows/_python_test.yml
     with:
       module_path: ${{ matrix.module }}
-    secrets: inherit
