@@ -73,15 +73,14 @@ jobs:
     - name: Test with coverage
       working-directory: ./${{ inputs.module_path }}
       run: |
-        pytest --cov-report=xml --cov-report=term
+        pytest --cov-report=xml:coverage.xml --cov-report=term
 
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v3
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-        file: ./coverage.xml
+        file: ./${{ inputs.module_path }}/coverage.xml
         fail_ci_if_error: false
-        flags: unittests
-        name: codecov-umbrella
+        flags: ${{ inputs.module_path }}
+        name: ${{ inputs.module_path }}
         verbose: true
-        working-directory: ./${{ inputs.module_path }}
