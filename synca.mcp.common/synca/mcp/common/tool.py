@@ -8,7 +8,7 @@ from typing import Any
 
 from mcp.server.fastmcp import Context
 
-ResultDict = dict[str, None | bool | str | dict[str, str | int | bool | dict]]
+from synca.mcp.common.types import ResultDict, OutputTuple, OutputInfoDict
 
 
 class Tool:
@@ -70,21 +70,21 @@ class Tool:
             self,
             stdout: str,
             stderr: str,
-            returncode: int | None) -> tuple[int, int, str, dict]:
+            returncode: int | None) -> OutputTuple:
         """Parse the tool output."""
         raise NotImplementedError
 
     def result(
             self,
-            return_code: int,
+            return_code: int | None,
             issues_count: int,
             output: str,
-            info: dict) -> ResultDict:
+            info: OutputInfoDict) -> ResultDict:
         """Format the final result."""
         return {
             "success": True,
             "data": {
-                "return_code": return_code,
+                "return_code": return_code or 0,
                 "message": (
                     f"Found {issues_count} issues for {self.tool_name}"),
                 "output": output,
