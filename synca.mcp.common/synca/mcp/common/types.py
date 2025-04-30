@@ -30,18 +30,18 @@ class OutputInfoDict(TypedDict, total=False):
     notes: list[str]
     resolutions: list[str]
     summary: NotRequired[dict[str, int | str] | None]
+    mode: NotRequired[str | None]
+    artifact_path: NotRequired[str | None]
+    timing: NotRequired[TimingInfoDict | None]
+    statuses: NotRequired[dict[str, StatusDict] | None]
+    coverage: NotRequired[CoverageDict | None]
 
-    # Specific to build tool
-    build_mode: str
-    timing: TimingInfoDict
-    statuses: dict[str, StatusDict]
+    compilation_output: NotRequired[str | None]
+    program_output: NotRequired[str | None]
 
     # Specific to clippy tool
     warning_types: dict[str, int]
     error_types: dict[str, int]
-
-    # Specific to tarpaulin tool
-    coverage: CoverageDict
 
 
 OutputTuple: TypeAlias = tuple[int | None, int, str, OutputInfoDict]
