@@ -1,6 +1,8 @@
 """MCP server tools for Python."""
 
 from mcp.server.fastmcp import Context, FastMCP
+
+from synca.mcp.common.types import ResultDict
 from synca.mcp.python.tool.pytest import PytestTool
 from synca.mcp.python.tool.mypy import MypyTool
 from synca.mcp.python.tool.flake8 import Flake8Tool
@@ -14,7 +16,7 @@ mcp = FastMCP("Python")
 async def pytest(
         ctx: Context,
         path: str,
-        pytest_args: list[str] | None = None) -> dict:
+        pytest_args: list[str] | None = None) -> ResultDict:
     """Run pytest on a Python project
 
     Executes pytest test runner on the specified project path.
@@ -54,7 +56,7 @@ async def pytest(
 async def mypy(
         ctx: Context,
         path: str,
-        mypy_args: list[str] | None = None) -> dict:
+        mypy_args: list[str] | None = None) -> ResultDict:
     """Run mypy type checker on a Python project
 
     Executes mypy type checker on the specified project path.
@@ -85,7 +87,7 @@ async def mypy(
 @mcp.tool()
 async def flake8(
         ctx: Context, path: str,
-        flake8_args: list[str] | None = None) -> dict:
+        flake8_args: list[str] | None = None) -> ResultDict:
     """Run flake8 linter on a Python project
 
     Executes flake8 linter on the specified project path.

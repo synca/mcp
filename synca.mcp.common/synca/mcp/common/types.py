@@ -10,7 +10,7 @@ class StatusDict(TypedDict):
     version: NotRequired[str | None]
 
 
-class CoverageDataDict(TypedDict):
+class CoverageDict(TypedDict):
     coverage_percent: float
     output_file: NotRequired[str | None]
 
@@ -24,7 +24,7 @@ class OutputInfoDict(TypedDict, total=False):
     warnings_count: int
     errors_count: int
     warnings: list[str]
-    error_messages: list[str]
+    errors: list[str]
     warning_messages: list[str]
     notes: list[str]
     resolutions: list[str]
@@ -39,7 +39,7 @@ class OutputInfoDict(TypedDict, total=False):
     error_types: dict[str, int]
 
     # Specific to tarpaulin tool
-    coverage_data: CoverageDataDict
+    coverage: CoverageDict
 
 
 OutputTuple: TypeAlias = tuple[int | None, int, str, OutputInfoDict]
