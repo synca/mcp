@@ -15,6 +15,7 @@ jobs:
       matrix:
         module:
         - synca.mcp.common
+        - synca.mcp.cargo
         - synca.mcp.python
       fail-fast: false
 
