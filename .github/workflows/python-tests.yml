@@ -24,4 +24,3 @@ jobs:
     uses: ./.github/workflows/_python_test.yml
     with:
       module_path: ${{ matrix.module }}
-    secrets: inherit
