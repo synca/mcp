@@ -11,7 +11,8 @@ class StatusDict(TypedDict):
 
 
 class CoverageDict(TypedDict):
-    coverage_percent: float
+    total: float
+    by_file: NotRequired[dict[str, float]]
     output_file: NotRequired[str | None]
 
 
