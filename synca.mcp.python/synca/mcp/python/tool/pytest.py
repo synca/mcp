@@ -1,9 +1,10 @@
 """Pytest runner tool implementation for MCP server."""
 
 import re
+from typing import cast
 
 from synca.mcp.common.tool import Tool
-from synca.mcp.common.types import OutputInfoDict, OutputTuple
+from synca.mcp.common.types import CoverageDict, OutputInfoDict, OutputTuple
 from synca.mcp.python.util.coverage import CoverageParser
 
 
@@ -21,13 +22,14 @@ class PytestTool(Tool):
             returncode: int | None) -> OutputTuple:
         """Parse the tool output."""
         combined_output = stdout + "\n" + stderr
+        summary = self._parse_summary(combined_output)
+        coverage = self._parse_coverage(combined_output)
         data: OutputInfoDict = dict(
-            summary=self._parse_summary(combined_output),
-            coverage=(
-                self._parse_coverage(combined_output)
-                or dict(total=0.0, by_file={})))
-        issues_count = data["summary"]["failed"]
-        if data["coverage"].get("failure"):
+            summary=cast(dict[str, str | int], summary))
+        if coverage := self._parse_coverage(combined_output):
+            data["coverage"] = coverage
+        issues_count = int(summary["failed"])
+        if coverage and coverage.get("failure"):
             issues_count += 1
         message = (
             "All tests passed successfully"
@@ -38,19 +40,22 @@ class PytestTool(Tool):
     def _parse_coverage(
             self,
             output: str
-    ) -> dict[str, float | dict[str, float]] | None:
+    ) -> CoverageDict | None:
         """Extract coverage statistics from pytest output.
         """
         if "Required test coverage" not in output:
             return None
-        return CoverageParser(output).data
+        return cast(
+            CoverageDict,
+            CoverageParser(output).data
+            or dict(total=0.0, by_file={}))
 
     def _parse_summary(
             self,
             output: str
     ) -> dict[str, int]:
         """Extract test summary statistics from pytest output."""
-        summary = {
+        summary: dict[str, int] = {
             "total": 0,
             "passed": 0,
             "failed": 0,
