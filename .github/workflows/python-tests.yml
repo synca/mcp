@@ -11,6 +11,8 @@ permissions:
 
 jobs:
   python-tests:
+    secrets:
+      CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
     strategy:
       matrix:
         module:
