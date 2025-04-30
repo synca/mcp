@@ -54,10 +54,9 @@ def test_tool_pytest_parse_output(
         "All tests passed successfully"
         if returncode == 0
         else combined_output)
-    expected_data = {
-        "summary": summary,
-        "coverage": coverage or {"total": 0.0, "by_file": {}}
-    }
+    expected_data = {"summary": summary}
+    if coverage:
+        expected_data["coverage"] = coverage
     patched = patches(
         ("PytestTool._parse_summary",
          dict(return_value=summary)),
