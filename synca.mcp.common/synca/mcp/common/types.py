@@ -28,6 +28,7 @@ class OutputInfoDict(TypedDict, total=False):
     warning_messages: list[str]
     notes: list[str]
     resolutions: list[str]
+    summary: NotRequired[dict[str, int | str] | None]
 
     # Specific to build tool
     build_mode: str
@@ -56,5 +57,5 @@ class ResultDataDict(TypedDict):
 
 class ResultDict(TypedDict):
     success: bool
-    data: ResultDataDict | None
+    data: NotRequired[ResultDataDict | None]
     error: NotRequired[str | None]
