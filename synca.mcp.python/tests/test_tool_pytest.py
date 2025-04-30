@@ -26,19 +26,19 @@ def test_tool_pytest_constructor():
 @pytest.mark.parametrize("stderr", ["", "Error output"])
 @pytest.mark.parametrize("returncode", [0, 1, None])
 @pytest.mark.parametrize(
-    "coverage_data",
+    "coverage",
     [None,
      {"total": 85.0, "by_file": {}},
      {"total": 85.0,
       "by_file": {},
       "failure": "FAIL Required coverage not reached"}])
 def test_tool_pytest_parse_output(
-        patches, stdout, stderr, returncode, coverage_data):
+        patches, stdout, stderr, returncode, coverage):
     """Test parse_output method with various combinations of inputs."""
     ctx = MagicMock()
     path = MagicMock()
     tool = PytestTool(ctx, path)
-    test_summary = {
+    summary = {
         "total": 5,
         "passed": 3,
         "failed": 2,
@@ -47,22 +47,22 @@ def test_tool_pytest_parse_output(
         "xpassed": 0
     }
     combined_output = stdout + "\n" + stderr
-    expected_issues = test_summary["failed"]
-    if coverage_data and coverage_data.get("failure"):
+    expected_issues = summary["failed"]
+    if coverage and coverage.get("failure"):
         expected_issues += 1
     expected_msg = (
         "All tests passed successfully"
         if returncode == 0
         else combined_output)
     expected_data = {
-        "test_summary": test_summary,
-        "coverage": coverage_data or {"total": 0.0, "by_file": {}}
+        "summary": summary,
+        "coverage": coverage or {"total": 0.0, "by_file": {}}
     }
     patched = patches(
-        ("PytestTool._parse_test_summary",
-         dict(return_value=test_summary)),
-        ("PytestTool._parse_coverage_data",
-         dict(return_value=coverage_data)),
+        ("PytestTool._parse_summary",
+         dict(return_value=summary)),
+        ("PytestTool._parse_coverage",
+         dict(return_value=coverage)),
         prefix="synca.mcp.python.tool.pytest")
 
     with patched as (m_summary, m_coverage):
@@ -89,8 +89,8 @@ def test_tool_pytest_parse_output(
 package/__init__.py     10      2    80%   5-7
 TOTAL                   10      2    80%
 FAIL Required test coverage of 95% not reached."""])
-def test_tool_pytest_parse_coverage_data(patches, output):
-    """Test _parse_coverage_data method with various inputs."""
+def test_tool_pytest_parse_coverage(patches, output):
+    """Test _parse_coverage method with various inputs."""
     ctx = MagicMock()
     path = MagicMock()
     tool = PytestTool(ctx, path)
@@ -101,7 +101,7 @@ def test_tool_pytest_parse_coverage_data(patches, output):
 
     with patched as (m_parser,):
         assert (
-            tool._parse_coverage_data(output)
+            tool._parse_coverage(output)
             == (m_parser.return_value.data
                 if has_coverage
                 else None))
@@ -152,10 +152,10 @@ def test_tool_pytest_parse_coverage_data(patches, output):
          "total": 11, "passed": 5, "failed": 3,
          "skipped": 2, "xfailed": 1, "xpassed": 0
      })])
-def test_tool_pytest_parse_test_summary(output, expected_summary):
-    """Test _parse_test_summary method with various inputs."""
+def test_tool_pytest_parse_summary(output, expected_summary):
+    """Test _parse_summary method with various inputs."""
     ctx = MagicMock()
     path = MagicMock()
     tool = PytestTool(ctx, path)
-    result = tool._parse_test_summary(output)
+    result = tool._parse_summary(output)
     assert result == expected_summary

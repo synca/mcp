@@ -1,6 +1,7 @@
 """Flake8 linter tool implementation for MCP server."""
 
 from synca.mcp.common.tool import Tool
+from synca.mcp.common.types import OutputTuple
 
 
 class Flake8Tool(Tool):
@@ -14,7 +15,7 @@ class Flake8Tool(Tool):
             self,
             stdout: str,
             stderr: str,
-            returncode: int | None) -> tuple[int, int, str, dict]:
+            returncode: int | None) -> OutputTuple:
         """Parse the tool output."""
         if (returncode or 0) > 1:
             raise RuntimeError(f"{self.tool_name} failed: {stderr}")
