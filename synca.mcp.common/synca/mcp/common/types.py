@@ -36,6 +36,8 @@ class OutputInfoDict(TypedDict, total=False):
     statuses: NotRequired[dict[str, StatusDict] | None]
     coverage: NotRequired[CoverageDict | None]
 
+    needs_formatting: NotRequired[bool]
+
     compilation_output: NotRequired[str | None]
     program_output: NotRequired[str | None]
 
