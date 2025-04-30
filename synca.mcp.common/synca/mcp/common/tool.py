@@ -11,25 +11,21 @@ from mcp.server.fastmcp import Context
 from synca.mcp.common.types import ResultDict, OutputTuple, OutputInfoDict
 
 
-class Tool:
+class BaseTool:
     """Base class for MCP server tools."""
 
-    def __init__(self, ctx: Context, path: str) -> None:
+    def __init__(self, ctx: Context, **kwargs: Any) -> None:
         """Initialize the tool with context and path.
         """
         self.ctx = ctx
-        self._path_str = path
 
     @property
     def config_args(self) -> tuple[str, ...]:
         return ()
 
-    @cached_property
+    @property
     def path(self) -> pathlib.Path:
-        """Get the validated path as a pathlib.Path object."""
-        path = pathlib.Path(self._path_str)
-        self.validate_path(path)
-        return path
+        raise NotImplementedError
 
     @property
     def tool_name(self) -> str:
@@ -43,19 +39,13 @@ class Tool:
             self,
             args: list[str] | None = None) -> list[str]:
         """Build the tool command."""
-        return [self.tool_path, *self.config_args, *(args or [])]
+        raise NotImplementedError
 
     async def execute(
             self,
             cmd: list[str]) -> tuple[str, str, int | None]:
         """Execute the tool command."""
-        process = await asyncio.create_subprocess_exec(
-            *cmd,
-            cwd=str(self.path),
-            stdout=asyncio.subprocess.PIPE,
-            stderr=asyncio.subprocess.PIPE)
-        stdout, stderr = await process.communicate()
-        return stdout.decode(), stderr.decode(), process.returncode
+        raise NotImplementedError
 
     async def handle(
             self,
@@ -112,3 +102,46 @@ class Tool:
         """
         if not pathlib.Path(path).exists():
             raise FileNotFoundError(f"Path '{path}' does not exist")
+
+
+class Tool(BaseTool):
+    """Base class for MCP server tools."""
+
+    def __init__(self, ctx: Context, path: str) -> None:
+        """Initialize the tool with context and path.
+        """
+        self.ctx = ctx
+        self._path_str = path
+
+    @cached_property
+    def path(self) -> pathlib.Path:
+        """Get the validated path as a pathlib.Path object."""
+        path = pathlib.Path(self._path_str)
+        self.validate_path(path)
+        return path
+
+    def command(
+            self,
+            args: list[str] | None = None) -> list[str]:
+        """Build the tool command."""
+        return [self.tool_path, *self.config_args, *(args or [])]
+
+    async def execute(
+            self,
+            cmd: list[str]) -> tuple[str, str, int | None]:
+        """Execute the tool command."""
+        process = await asyncio.create_subprocess_exec(
+            *cmd,
+            cwd=str(self.path),
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE)
+        stdout, stderr = await process.communicate()
+        return stdout.decode(), stderr.decode(), process.returncode
+
+    def parse_output(
+            self,
+            stdout: str,
+            stderr: str,
+            returncode: int | None) -> OutputTuple:
+        """Parse the tool output."""
+        raise NotImplementedError

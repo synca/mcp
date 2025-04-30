@@ -3,7 +3,29 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, PropertyMock
 
-from synca.mcp.common.tool import Tool
+from synca.mcp.common.tool import BaseTool, Tool
+
+
+@pytest.mark.asyncio
+async def test_base_tool_constructor():
+    """Test Tool class initialization."""
+    ctx = MagicMock()
+    tool = BaseTool(ctx)
+    assert tool.ctx == ctx
+    with pytest.raises(NotImplementedError):
+        tool.tool_name
+    with pytest.raises(NotImplementedError):
+        tool.path
+    with pytest.raises(NotImplementedError):
+        tool.command()
+        breakpoint()
+    with pytest.raises(NotImplementedError):
+        await tool.execute(MagicMock())
+    with pytest.raises(NotImplementedError):
+        await tool.parse_output(
+            MagicMock(),
+            MagicMock(),
+            MagicMock())
 
 
 def test_tool_constructor():
@@ -11,6 +33,7 @@ def test_tool_constructor():
     ctx = MagicMock()
     path = MagicMock()
     tool = Tool(ctx, path)
+    assert isinstance(tool, BaseTool)
     assert isinstance(tool, Tool)
     assert tool.ctx == ctx
     assert tool._path_str == path
