@@ -11,7 +11,7 @@ from mcp.server.fastmcp import Context
 from synca.mcp.common.types import ResultDict, OutputTuple, OutputInfoDict
 
 
-class BaseTool:
+class Tool:
     """Base class for MCP server tools."""
 
     def __init__(self, ctx: Context, **kwargs: Any) -> None:
@@ -24,16 +24,8 @@ class BaseTool:
         return ()
 
     @property
-    def path(self) -> pathlib.Path:
-        raise NotImplementedError
-
-    @property
     def tool_name(self) -> str:
         raise NotImplementedError
-
-    @property
-    def tool_path(self) -> str:
-        return self.tool_name
 
     def command(
             self,
@@ -43,7 +35,7 @@ class BaseTool:
 
     async def execute(
             self,
-            cmd: list[str]) -> tuple[str, str, int | None]:
+            cmd: list[str]) -> tuple[str, str, int]:
         """Execute the tool command."""
         raise NotImplementedError
 
@@ -51,7 +43,7 @@ class BaseTool:
             self,
             args: list[str] | None = None) -> ResultDict:
         """Run tool on a Python project."""
-        return self.result(
+        return self.response(
             *self.parse_output(
                 *await self.execute(
                     self.command(args))))
@@ -60,29 +52,24 @@ class BaseTool:
             self,
             stdout: str,
             stderr: str,
-            returncode: int | None) -> OutputTuple:
+            returncode: int) -> OutputTuple:
         """Parse the tool output."""
         raise NotImplementedError
 
-    def result(
+    def response(
             self,
-            return_code: int | None,
-            issues_count: int,
+            return_code: int,
+            message: str,
             output: str,
             info: OutputInfoDict) -> ResultDict:
-        """Format the final result."""
+        """Format the final response."""
         return {
-            "success": True,
             "data": {
-                "return_code": return_code or 0,
-                "message": (
-                    f"Found {issues_count} issues for {self.tool_name}"),
+                "return_code": return_code,
+                "message": message,
                 "output": output,
-                "project_path": str(self.path),
-                "issues_count": issues_count,
                 "info": info,
-            },
-            "error": None}
+            }}
 
     async def run(self, *args: Any, **kwargs: Any) -> ResultDict:
         """Run the tool and handle exceptions."""
@@ -93,12 +80,10 @@ class BaseTool:
             tool_name = self.__class__.__name__.lower().replace("tool", "")
             error_msg = f"Failed to run {tool_name}: {str(e)}\n{trace}"
             return {
-                "success": False,
-                "data": None,
                 "error": error_msg}
 
 
-class Tool(BaseTool):
+class CLITool(Tool):
     """Base class for MCP server tools."""
 
     def __init__(self, ctx: Context, path: str) -> None:
@@ -114,6 +99,10 @@ class Tool(BaseTool):
         self.validate_path(path)
         return path
 
+    @property
+    def tool_path(self) -> str:
+        return self.tool_name
+
     def command(
             self,
             args: list[str] | None = None) -> list[str]:
@@ -122,7 +111,7 @@ class Tool(BaseTool):
 
     async def execute(
             self,
-            cmd: list[str]) -> tuple[str, str, int | None]:
+            cmd: list[str]) -> tuple[str, str, int]:
         """Execute the tool command."""
         process = await asyncio.create_subprocess_exec(
             *cmd,
@@ -130,15 +119,7 @@ class Tool(BaseTool):
             stdout=asyncio.subprocess.PIPE,
             stderr=asyncio.subprocess.PIPE)
         stdout, stderr = await process.communicate()
-        return stdout.decode(), stderr.decode(), process.returncode
-
-    def parse_output(
-            self,
-            stdout: str,
-            stderr: str,
-            returncode: int | None) -> OutputTuple:
-        """Parse the tool output."""
-        raise NotImplementedError
+        return stdout.decode(), stderr.decode(), process.returncode or 0
 
     def validate_path(self, path: pathlib.Path) -> None:
         """Validate that the project path exists and is a directory.
@@ -149,4 +130,5 @@ class Tool(BaseTool):
             raise NotADirectoryError(f"Path '{path}' is not a directory")
 
 
-CLITool = Tool
+class CheckTool(CLITool):
+    pass
