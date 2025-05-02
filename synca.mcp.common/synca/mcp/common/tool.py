@@ -97,12 +97,6 @@ class BaseTool:
                 "data": None,
                 "error": error_msg}
 
-    def validate_path(self, path: pathlib.Path) -> None:
-        """Validate that the project path exists.
-        """
-        if not pathlib.Path(path).exists():
-            raise FileNotFoundError(f"Path '{path}' does not exist")
-
 
 class Tool(BaseTool):
     """Base class for MCP server tools."""
@@ -145,3 +139,14 @@ class Tool(BaseTool):
             returncode: int | None) -> OutputTuple:
         """Parse the tool output."""
         raise NotImplementedError
+
+    def validate_path(self, path: pathlib.Path) -> None:
+        """Validate that the project path exists and is a directory.
+        """
+        if not pathlib.Path(path).exists():
+            raise FileNotFoundError(f"Path '{path}' does not exist")
+        if not pathlib.Path(path).is_dir():
+            raise NotADirectoryError(f"Path '{path}' is not a directory")
+
+
+CLITool = Tool
