@@ -17,7 +17,7 @@ class BuildTool(CargoTool):
             self,
             stdout: str,
             stderr: str,
-            return_code: int | None) -> OutputTuple:
+            return_code: int) -> OutputTuple:
         """Parse the build output."""
         combined_output = stdout + "\n" + stderr
         info: OutputInfoDict = {}
@@ -38,10 +38,17 @@ class BuildTool(CargoTool):
             info["notes"] = notes
         issues_count = len(warnings) + len(errors)
         successful = return_code == 0 and "Finished" in combined_output
-        output = combined_output
-        if successful and not issues_count:
-            output = "Build completed successfully with no issues"
-        return (return_code, issues_count, output, info)
+        return (
+            return_code,
+            ("Build completed successfully with no issues"
+             if (successful
+                 and not issues_count)
+             else f"Build issues: {issues_count}"),
+            (""
+             if (successful
+                 and not issues_count)
+             else combined_output),
+            info)
 
     def _extract_mode(self, combined_output: str) -> str | None:
         """Extract the build mode (debug/release) from output."""

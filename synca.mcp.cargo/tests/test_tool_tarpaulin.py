@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from synca.mcp.cargo.tool.base import Tool, CargoTool
+from synca.mcp.cargo.tool.base import CargoTool
 from synca.mcp.cargo.tool.tarpaulin import TarpaulinTool
 
 
@@ -15,7 +15,6 @@ def test_tool_tarpaulin_constructor():
     tool = TarpaulinTool(ctx, path)
     assert isinstance(tool, TarpaulinTool)
     assert isinstance(tool, CargoTool)
-    assert isinstance(tool, Tool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "tarpaulin"
@@ -86,11 +85,13 @@ def test_tool_tarpaulin_parse_output(
     expected_message = (
         f"Coverage: {coverage_percentage:.2f}%"
         if all_good
-        else combined_output)
+        else "Issues found during coverage analysis")
     expected_result = (
         return_code,
-        issues_count,
         expected_message,
+        (""
+         if all_good
+         else combined_output),
         expected_info)
     patched = patches(
         "TarpaulinTool.parse_issues",
@@ -125,8 +126,7 @@ def test_tool_tarpaulin_parse_issues(patches, additional_error_matches):
         "failed to execute",
         "couldn't find binary",
         "failed to parse",
-        "error running tarpaulin"
-    ]
+        "error running tarpaulin"]
     expected_return = (MagicMock(), MagicMock(), MagicMock())
     patched = patches(
         "CargoTool.parse_issues",

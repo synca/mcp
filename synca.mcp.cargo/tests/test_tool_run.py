@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from synca.mcp.cargo.tool.base import Tool, CargoTool
+from synca.mcp.cargo.tool.base import CargoTool
 from synca.mcp.cargo.tool.run import RunTool
 
 
@@ -15,7 +15,6 @@ def test_tool_run_constructor():
     tool = RunTool(ctx, path)
     assert isinstance(tool, RunTool)
     assert isinstance(tool, CargoTool)
-    assert isinstance(tool, Tool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "run"
@@ -65,7 +64,7 @@ def test_run_parse_output(
               if error_type == "compilation"
               else "Program execution failed"))
     expected_output = (
-        expected_message
+        ""
         if successful
         else combined_output)
     expected_info = {"mode": build_mode or "debug"}
@@ -101,9 +100,8 @@ def test_run_parse_output(
             m_determine_error_type.return_value = error_type
         assert (
             tool.parse_output(stdout, stderr, return_code)
-            == (
-                return_code or 0,
-                issues_count,
+            == (return_code or 0,
+                expected_message,
                 expected_output,
                 expected_info))
 
