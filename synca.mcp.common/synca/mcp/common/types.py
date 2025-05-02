@@ -2,6 +2,9 @@
 
 from typing import TypeAlias, TypedDict, NotRequired
 
+
+CommandTuple: TypeAlias = tuple[str, ...]
+ExecutionTuple: TypeAlias = tuple[str, str, int]
 IssuesTuple: TypeAlias = tuple[list[str], list[str], list[str]]
 
 

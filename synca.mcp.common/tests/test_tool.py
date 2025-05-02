@@ -210,7 +210,7 @@ def test_cli_tool_command(patches, args):
     with patched as (m_tool_path, ):
         assert (
             tool.command(args)
-            == [m_tool_path.return_value, *(args or [])])
+            == (m_tool_path.return_value, *(args or [])))
 
     assert "tool_path" not in tool.__dict__
 
