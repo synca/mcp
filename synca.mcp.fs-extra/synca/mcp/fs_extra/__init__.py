@@ -1,0 +1,1 @@
+"""MCP fs-extra package."""
