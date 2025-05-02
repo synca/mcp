@@ -16,7 +16,7 @@ class TestTool(CargoTool):
             self,
             stdout: str,
             stderr: str,
-            return_code: int | None) -> OutputTuple:
+            return_code: int) -> OutputTuple:
         combined_output = stdout + "\n" + stderr
         info: OutputInfoDict = {}
         warnings, errors, notes = self.parse_issues(combined_output)
@@ -45,8 +45,8 @@ class TestTool(CargoTool):
             else "Some tests failed")
         return (
             return_code,
-            issues_count,
-            message if all_good else combined_output,
+            message,
+            "" if all_good else combined_output,
             info)
 
     def _extract_summary(

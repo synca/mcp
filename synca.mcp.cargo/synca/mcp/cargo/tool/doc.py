@@ -16,7 +16,7 @@ class DocTool(CargoTool):
             self,
             stdout: str,
             stderr: str,
-            return_code: int | None) -> OutputTuple:
+            return_code: int) -> OutputTuple:
         """Parse the cargo doc output.
 
         Args:
@@ -52,8 +52,10 @@ class DocTool(CargoTool):
             and "Finished" in combined_output)
         return (
             return_code or 0,
-            issues_count,
             ("Documentation successfully generated"
+             if all_good
+             else "Documentation generation failed"),
+            (""
              if all_good
              else combined_output),
             info)

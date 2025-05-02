@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from synca.mcp.cargo.tool.base import Tool, CargoTool
+from synca.mcp.cargo.tool.base import CargoTool
 from synca.mcp.cargo.tool.clippy import ClippyTool
 
 
@@ -15,7 +15,6 @@ def test_tool_clippy_constructor():
     tool = ClippyTool(ctx, path)
     assert isinstance(tool, ClippyTool)
     assert isinstance(tool, CargoTool)
-    assert isinstance(tool, Tool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "clippy"
@@ -31,10 +30,9 @@ def test_tool_clippy_command(args):
     kwargs = {}
     if args:
         kwargs["args"] = MagicMock()
-    expected = ['cargo', 'clippy']
     assert (
         tool.command(**kwargs)
-        == expected)
+        == ("cargo", "clippy"))
 
 
 @pytest.mark.parametrize("return_code", [0, 1, None])
@@ -53,9 +51,9 @@ def test_clippy_parse_output(
     if has_finished:
         stdout += "Finished dev [unoptimized + debuginfo]\n"
     stderr = ""
-    expected_issues_count = len(warnings) + len(errors)
+    issues_count = len(warnings) + len(errors)
     all_good = (
-        expected_issues_count == 0
+        issues_count == 0
         and return_code == 0
         and has_finished)
     expected_calls = []
@@ -83,12 +81,14 @@ def test_clippy_parse_output(
             expected_info["resolutions"] = resolutions
         assert (
             result
-            == (
-                return_code or 0,
-                expected_issues_count,
-                "No issues found" if all_good else stdout + "\n" + stderr,
-                expected_info
-            ))
+            == (return_code or 0,
+                ("No issues found"
+                 if all_good
+                 else f"Issues found: {issues_count}"),
+                (""
+                 if all_good
+                 else stdout + "\n" + stderr),
+                expected_info))
 
     assert (
         m_parse_issues.call_args

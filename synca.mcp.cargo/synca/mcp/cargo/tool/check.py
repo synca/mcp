@@ -16,7 +16,7 @@ class CheckTool(CargoTool):
             self,
             stdout: str,
             stderr: str,
-            return_code: int | None) -> OutputTuple:
+            return_code: int) -> OutputTuple:
         """Parse the cargo check output.
 
         Args:
@@ -50,8 +50,10 @@ class CheckTool(CargoTool):
             and "Finished" in combined_output)
         return (
             return_code,
-            issues_count,
             ("No issues found"
+             if all_good
+             else f"Issues found: {issues_count}"),
+            (""
              if all_good
              else combined_output),
             info)

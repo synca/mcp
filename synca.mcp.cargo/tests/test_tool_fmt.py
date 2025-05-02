@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from synca.mcp.cargo.tool.base import Tool, CargoTool
+from synca.mcp.cargo.tool.base import CargoTool
 from synca.mcp.cargo.tool.fmt import FmtTool
 
 
@@ -15,7 +15,6 @@ def test_tool_fmt_constructor():
     tool = FmtTool(ctx, path)
     assert isinstance(tool, FmtTool)
     assert isinstance(tool, CargoTool)
-    assert isinstance(tool, Tool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "fmt"
@@ -30,15 +29,14 @@ def test_fmt_parse_output(patches, has_diffs, return_code, empty_output):
     ctx = MagicMock()
     path = MagicMock()
     tool = FmtTool(ctx, path)
-    stdout = ""
     stderr = ""
-    if not empty_output:
-        stdout = (
-            ("Diff in src/main.rs at line 10:\n"
-             "-    let x = 5;\n"
-             "+    let x = 5;")
-            if has_diffs
-            else "Some output without diff")
+    stdout = (
+        ("Diff in src/main.rs at line 10:\n"
+         "-    let x = 5;\n"
+         "+    let x = 5;")
+        if (has_diffs
+            and not empty_output)
+        else "")
     combined_output = stdout + "\n" + stderr
     warnings = ["warning: test warning"]
     errors = ["error: test error"]
@@ -53,16 +51,10 @@ def test_fmt_parse_output(patches, has_diffs, return_code, empty_output):
     expected_info["errors_count"] = len(errors)
     expected_info["errors"] = errors
     expected_info["notes"] = notes
-    expected_issues_count = (
-        1
-        if expected_info["needs_formatting"]
-        else 0)
-    expected_message = combined_output
-    if empty_output:
-        expected_message = (
-            "Code is properly formatted"
-            if return_code == 0
-            else "Cargo fmt failed")
+    message = (
+        "Code is properly formatted"
+        if return_code == 0
+        else "Cargo fmt failed")
     patched = patches(
         "FmtTool.parse_issues",
         prefix="synca.mcp.cargo.tool.fmt")
@@ -72,8 +64,8 @@ def test_fmt_parse_output(patches, has_diffs, return_code, empty_output):
         assert (
             tool.parse_output(stdout, stderr, return_code)
             == (return_code or 0,
-                expected_issues_count,
-                expected_message,
+                message,
+                combined_output.strip(),
                 expected_info))
 
     assert (

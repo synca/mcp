@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from synca.mcp.cargo.tool.base import Tool, CargoTool
+from synca.mcp.cargo.tool.base import CargoTool
 from synca.mcp.cargo.tool.check import CheckTool
 
 
@@ -15,7 +15,6 @@ def test_tool_check_constructor():
     tool = CheckTool(ctx, path)
     assert isinstance(tool, CheckTool)
     assert isinstance(tool, CargoTool)
-    assert isinstance(tool, Tool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "check"
@@ -65,12 +64,12 @@ def test_check_parse_output(
         result = tool.parse_output(stdout, stderr, return_code)
         assert (
             result
-            == (
-                return_code,
-                expected_issues_count,
-                "No issues found" if all_good else stdout + "\n" + stderr,
-                expected_info
-            ))
+            == (return_code,
+                ("No issues found"
+                 if all_good
+                 else f"Issues found: {expected_issues_count}"),
+                "" if all_good else stdout + "\n" + stderr,
+                expected_info))
 
     assert (
         m_parse_issues.call_args

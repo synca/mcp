@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from synca.mcp.cargo.tool.base import Tool, CargoTool
+from synca.mcp.cargo.tool.base import CargoTool
 from synca.mcp.cargo.tool.doc import DocTool
 
 
@@ -15,7 +15,6 @@ def test_tool_doc_constructor():
     tool = DocTool(ctx, path)
     assert isinstance(tool, DocTool)
     assert isinstance(tool, CargoTool)
-    assert isinstance(tool, Tool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "doc"
@@ -48,9 +47,13 @@ def test_doc_parse_output(
     issues_count = len(warnings) + len(errors)
     successful = return_code == 0 and has_finished
     expected_output = (
-        "Documentation successfully generated"
+        ""
         if (successful and not issues_count)
         else combined_output)
+    message = (
+        "Documentation successfully generated"
+        if (successful and not issues_count)
+        else "Documentation generation failed")
     expected_info = {}
     if package_name:
         expected_info["artifact_path"] = "/mocked/path"
@@ -73,12 +76,10 @@ def test_doc_parse_output(
         m_extract_package_name.return_value = package_name
         assert (
             tool.parse_output(stdout, stderr, return_code)
-            == (
-                return_code or 0,
-                issues_count,
+            == (return_code or 0,
+                message,
                 expected_output,
-                expected_info
-            ))
+                expected_info))
 
     assert (
         m_parse_issues.call_args

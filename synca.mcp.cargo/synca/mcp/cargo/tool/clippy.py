@@ -41,8 +41,10 @@ class ClippyTool(CargoTool):
             and "Finished" in combined_output)
         return (
             return_code or 0,
-            issues_count,
             ("No issues found"
+             if all_good
+             else f"Issues found: {issues_count}"),
+            (""
              if all_good
              else combined_output),
             info)

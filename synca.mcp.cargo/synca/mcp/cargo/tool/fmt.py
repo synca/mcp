@@ -16,7 +16,7 @@ class FmtTool(CargoTool):
             self,
             stdout: str,
             stderr: str,
-            return_code: int | None) -> OutputTuple:
+            return_code: int) -> OutputTuple:
         """Parse the cargo fmt output.
 
         Args:
@@ -46,15 +46,12 @@ class FmtTool(CargoTool):
             "Diff in" in combined_output
             and return_code != 0)
         info["needs_formatting"] = needs_formatting
-        issues_count = 1 if needs_formatting else 0
         message = (
             "Code is properly formatted"
             if return_code == 0
             else "Cargo fmt failed")
         return (
             return_code or 0,
-            issues_count,
-            (message
-             if combined_output.strip() == ""
-             else combined_output),
+            message,
+            combined_output.strip(),
             info)

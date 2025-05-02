@@ -17,7 +17,7 @@ class TarpaulinTool(CargoTool):
             self,
             stdout: str,
             stderr: str,
-            return_code: int | None) -> OutputTuple:
+            return_code: int) -> OutputTuple:
         """Parse tarpaulin output.
 
         Extracts coverage data, warnings, and errors from tarpaulin output.
@@ -47,8 +47,8 @@ class TarpaulinTool(CargoTool):
             else "Issues found during coverage analysis")
         return (
             return_code,
-            issues_count,
-            message if all_good else combined_output,
+            message,
+            "" if all_good else combined_output,
             info)
 
     def parse_issues(

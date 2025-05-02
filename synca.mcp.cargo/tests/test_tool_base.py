@@ -4,7 +4,8 @@ from unittest.mock import MagicMock, PropertyMock
 
 import pytest
 
-from synca.mcp.cargo.tool.base import Tool, CargoTool
+from synca.mcp.common.tool import CLITool
+from synca.mcp.cargo.tool.base import CargoTool
 
 
 def test_tool_base_constructor():
@@ -13,7 +14,7 @@ def test_tool_base_constructor():
     path = MagicMock()
     tool = CargoTool(ctx, path)
     assert isinstance(tool, CargoTool)
-    assert isinstance(tool, Tool)
+    assert isinstance(tool, CLITool)
     assert tool.ctx == ctx
     assert tool._path_str == path
 

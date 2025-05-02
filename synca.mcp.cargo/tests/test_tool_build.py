@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from synca.mcp.cargo.tool.base import Tool, CargoTool
+from synca.mcp.cargo.tool.base import CargoTool
 from synca.mcp.cargo.tool.build import BuildTool
 
 
@@ -15,7 +15,6 @@ def test_tool_build_constructor():
     tool = BuildTool(ctx, path)
     assert isinstance(tool, BuildTool)
     assert isinstance(tool, CargoTool)
-    assert isinstance(tool, Tool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "build"
@@ -44,10 +43,14 @@ def test_build_parse_output(
     combined_output = stdout + "\n" + stderr
     successful = return_code == 0 and has_finished
     expected_output = (
-        "Build completed successfully with no issues"
+        ""
         if (successful and not warnings and not errors)
         else combined_output)
     expected_issues = len(warnings) + len(errors)
+    message = (
+        "Build completed successfully with no issues"
+        if (successful and not warnings and not errors)
+        else f"Build issues: {expected_issues}")
     expected_info = {}
     if mode:
         expected_info["mode"] = mode
@@ -77,9 +80,8 @@ def test_build_parse_output(
         m_statuses.return_value = statuses
         assert (
             tool.parse_output(stdout, stderr, return_code)
-            == (
-                return_code,
-                expected_issues,
+            == (return_code,
+                message,
                 expected_output,
                 expected_info))
 

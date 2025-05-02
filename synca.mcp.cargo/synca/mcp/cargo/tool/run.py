@@ -16,7 +16,7 @@ class RunTool(CargoTool):
             self,
             stdout: str,
             stderr: str,
-            return_code: int | None) -> OutputTuple:
+            return_code: int) -> OutputTuple:
         """Parse the cargo run output.
         """
         combined_output = stdout + "\n" + stderr
@@ -52,8 +52,12 @@ class RunTool(CargoTool):
                   if (next(iter(info.get("error_types", {})), "")
                       == "compilation")
                   else "Program execution failed"))
-        output = message if successful else combined_output
-        return (return_code or 0, issues_count, output, info)
+        output = "" if successful else combined_output
+        return (
+            return_code or 0,
+            message,
+            output,
+            info)
 
     def _extract_all(
             self,
