@@ -228,29 +228,46 @@ def test_tool_result(patches, issues_count):
         == [(m_path.return_value, ), {}])
 
 
-@pytest.mark.parametrize("exists", [True, False])
-def test_tool_validate_path(patches, exists):
-    """Test validate_path method with parametrized path existence."""
+@pytest.mark.parametrize(
+    "exists",
+    [True, False])
+@pytest.mark.parametrize(
+    "is_dir",
+    [True, False])
+def test_tool_validate_path(patches, exists, is_dir):
+    """Test validate_path with parametrized existence and directory check."""
     patched = patches(
         "pathlib.Path",
         prefix="synca.mcp.common.tool")
     ctx = MagicMock()
     path = MagicMock()
     tool = Tool(ctx, path)
+
     with patched as (m_path, ):
         m_path.return_value.exists.return_value = exists
+        m_path.return_value.is_dir.return_value = is_dir
         if not exists:
             with pytest.raises(FileNotFoundError) as e:
+                tool.validate_path(path)
+        elif not is_dir:
+            with pytest.raises(NotADirectoryError) as e:
                 tool.validate_path(path)
         else:
             assert not tool.validate_path(path)
 
     assert m_path.call_args == [(path,), {}]
     assert m_path.return_value.exists.called
+    assert (
+        m_path.return_value.is_dir.called
+        == exists)
     if not exists:
         assert (
             e.value.args[0]
             == f"Path '{path}' does not exist")
+    elif not is_dir:
+        assert (
+            e.value.args[0]
+            == f"Path '{path}' is not a directory")
 
 
 @pytest.mark.parametrize(
