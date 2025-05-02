@@ -8,7 +8,12 @@ from typing import Any
 
 from mcp.server.fastmcp import Context
 
-from synca.mcp.common.types import ResultDict, OutputTuple, OutputInfoDict
+from synca.mcp.common.types import (
+    CommandTuple,
+    ExecutionTuple,
+    OutputTuple,
+    OutputInfoDict,
+    ResultDict)
 
 
 class Tool:
@@ -29,19 +34,19 @@ class Tool:
 
     def command(
             self,
-            args: list[str] | None = None) -> list[str]:
+            args: tuple[str] | None = None) -> CommandTuple:
         """Build the tool command."""
         raise NotImplementedError
 
     async def execute(
             self,
-            cmd: list[str]) -> tuple[str, str, int]:
+            cmd: CommandTuple) -> ExecutionTuple:
         """Execute the tool command."""
         raise NotImplementedError
 
     async def handle(
             self,
-            args: list[str] | None = None) -> ResultDict:
+            args: tuple[str] | None = None) -> ResultDict:
         """Run tool on a Python project."""
         return self.response(
             *self.parse_output(
@@ -105,13 +110,13 @@ class CLITool(Tool):
 
     def command(
             self,
-            args: list[str] | None = None) -> list[str]:
+            args: tuple[str, ...] | None = None) -> CommandTuple:
         """Build the tool command."""
-        return [self.tool_path, *self.config_args, *(args or [])]
+        return (self.tool_path, *self.config_args, *(args or []))
 
     async def execute(
             self,
-            cmd: list[str]) -> tuple[str, str, int]:
+            cmd: CommandTuple) -> ExecutionTuple:
         """Execute the tool command."""
         process = await asyncio.create_subprocess_exec(
             *cmd,
