@@ -18,6 +18,7 @@ jobs:
         module:
         - synca.mcp.common
         - synca.mcp.cargo
+        - synca.mcp.fs-extra
         - synca.mcp.python
       fail-fast: false
 
