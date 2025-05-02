@@ -1,28 +1,18 @@
 """Mypy type checker tool implementation for MCP server."""
 
-from synca.mcp.common.tool import Tool
-from synca.mcp.common.types import OutputTuple
+from synca.mcp.python.tool.base import PythonTool
 
 
-class MypyTool(Tool):
+class MypyTool(PythonTool):
     """Mypy type checker tool implementation."""
 
     @property
     def tool_name(self) -> str:
         return "mypy"
 
-    def parse_output(
-            self,
-            stdout: str,
-            stderr: str,
-            returncode: int | None) -> OutputTuple:
-        """Parse the tool output.
-        """
-        if (returncode or 0) > 1:
-            raise RuntimeError(f"{self.tool_name} failed: {stderr}")
-        combined_output = stdout + "\n" + stderr
+    def parse_issues(self, stdout: str, stderr: str) -> int:
         stdout_length = len(stdout.strip().splitlines())
-        issues_count = (stdout_length - 1) if stdout.strip() else 0
-        strip_out = combined_output.strip()
-        msg_output = strip_out if issues_count else "No issues found"
-        return returncode or 0, issues_count, msg_output, {}
+        return (
+            (stdout_length - 1)
+            if stdout.strip()
+            else 0)

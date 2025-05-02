@@ -24,7 +24,7 @@ def test_tool_pytest_constructor():
 @pytest.mark.parametrize(
     "stdout", ["", "Test output", "=== 1 passed in 0.1s ==="])
 @pytest.mark.parametrize("stderr", ["", "Error output"])
-@pytest.mark.parametrize("returncode", [0, 1, None])
+@pytest.mark.parametrize("returncode", [0, 1, 2])
 @pytest.mark.parametrize(
     "coverage",
     [None,
@@ -47,14 +47,18 @@ def test_tool_pytest_parse_output(
         "xpassed": 0
     }
     combined_output = stdout + "\n" + stderr
-    expected_issues = summary["failed"]
+    issues_count = summary["failed"]
     if coverage and coverage.get("failure"):
-        expected_issues += 1
-    expected_msg = (
+        issues_count += 1
+    message = (
         "All tests passed successfully"
         if returncode == 0
-        else combined_output)
+        else f"Tests failed: {issues_count} issues found")
     expected_data = {"summary": summary}
+    output = (
+        combined_output
+        if issues_count
+        else "")
     if coverage:
         expected_data["coverage"] = coverage
     patched = patches(
@@ -67,7 +71,7 @@ def test_tool_pytest_parse_output(
     with patched as (m_summary, m_coverage):
         assert (
             tool.parse_output(stdout, stderr, returncode)
-            == (returncode or 0, expected_issues, expected_msg, expected_data))
+            == (returncode or 0, message, output, expected_data))
 
     assert (
         m_summary.call_args

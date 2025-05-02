@@ -3,12 +3,12 @@
 import re
 from typing import cast
 
-from synca.mcp.common.tool import Tool
 from synca.mcp.common.types import CoverageDict, OutputInfoDict, OutputTuple
+from synca.mcp.python.tool.base import PythonTool
 from synca.mcp.python.util.coverage import CoverageParser
 
 
-class PytestTool(Tool):
+class PytestTool(PythonTool):
     """Pytest runner tool implementation."""
 
     @property
@@ -19,7 +19,7 @@ class PytestTool(Tool):
             self,
             stdout: str,
             stderr: str,
-            returncode: int | None) -> OutputTuple:
+            returncode: int) -> OutputTuple:
         """Parse the tool output."""
         combined_output = stdout + "\n" + stderr
         summary = self._parse_summary(combined_output)
@@ -34,8 +34,14 @@ class PytestTool(Tool):
         message = (
             "All tests passed successfully"
             if returncode == 0
-            else combined_output)
-        return returncode or 0, issues_count, message, data
+            else f"Tests failed: {issues_count} issues found")
+        return (
+            returncode,
+            message,
+            (combined_output
+             if issues_count
+             else ""),
+            data)
 
     def _parse_coverage(
             self,
