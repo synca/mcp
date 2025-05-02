@@ -51,6 +51,10 @@ class OutputInfoDict(TypedDict, total=False):
     warning_types: dict[str, int]
     error_types: dict[str, int]
 
+    # Specific to fs-extra tools (head, tail, etc.)
+    lines_read: NotRequired[int]
+    bytes_read: NotRequired[int]
+
 
 OutputTuple: TypeAlias = tuple[int, str, str, OutputInfoDict]
 
