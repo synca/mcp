@@ -3,19 +3,17 @@
 import pytest
 from unittest.mock import AsyncMock, MagicMock, PropertyMock
 
-from synca.mcp.common.tool import BaseTool, Tool
+from synca.mcp.common.tool import CLITool, Tool
 
 
 @pytest.mark.asyncio
-async def test_base_tool_constructor():
+async def test_tool_constructor():
     """Test Tool class initialization."""
     ctx = MagicMock()
-    tool = BaseTool(ctx)
+    tool = Tool(ctx)
     assert tool.ctx == ctx
     with pytest.raises(NotImplementedError):
         tool.tool_name
-    with pytest.raises(NotImplementedError):
-        tool.path
     with pytest.raises(NotImplementedError):
         tool.command()
         breakpoint()
@@ -28,133 +26,17 @@ async def test_base_tool_constructor():
             MagicMock())
 
 
-def test_tool_constructor():
-    """Test Tool class initialization."""
-    ctx = MagicMock()
-    path = MagicMock()
-    tool = Tool(ctx, path)
-    assert isinstance(tool, BaseTool)
-    assert isinstance(tool, Tool)
-    assert tool.ctx == ctx
-    assert tool._path_str == path
-    with pytest.raises(NotImplementedError):
-        tool.tool_name
-
-
-def test_tool_path(patches):
-    """Test Tool path."""
-    ctx = MagicMock()
-    path = MagicMock()
-    tool = Tool(ctx, path)
-    patched = patches(
-        "pathlib",
-        "Tool.validate_path",
-        prefix="synca.mcp.common.tool")
-
-    with patched as (m_path, m_valid):
-        assert (
-            tool.path
-            == m_path.Path.return_value)
-
-    assert (
-        m_path.Path.call_args
-        == [(path, ), {}])
-    assert (
-        m_valid.call_args
-        == [(m_path.Path.return_value, ), {}])
-    assert "path" in tool.__dict__
-
-
-def test_tool_tool_path(patches):
-    """Test Tool path."""
-    ctx = MagicMock()
-    path = MagicMock()
-    tool = Tool(ctx, path)
-    patched = patches(
-        ("Tool.tool_name",
-         dict(new_callable=PropertyMock)),
-        prefix="synca.mcp.common.tool")
-
-    with patched as (m_name, ):
-        assert (
-            tool.tool_path
-            == m_name.return_value)
-
-
-@pytest.mark.parametrize(
-    "args",
-    [None,
-     [MagicMock()],
-     [MagicMock(), MagicMock()]])
-def test_tool_command(patches, args):
-    """Test command with parametrized arguments."""
-    path = "/test/path"
-    ctx = MagicMock()
-    path = MagicMock()
-    tool = Tool(ctx, path)
-    patched = patches(
-        ("Tool.tool_path",
-         dict(new_callable=PropertyMock)),
-        prefix="synca.mcp.common.tool")
-
-    with patched as (m_tool_path, ):
-        assert (
-            tool.command(args)
-            == [m_tool_path.return_value, *(args or [])])
-
-    assert "tool_path" not in tool.__dict__
-
-
-@pytest.mark.asyncio
-async def test_tool_execute(patches):
-    """Test execute method."""
-    cmd = (MagicMock(), MagicMock(), MagicMock())
-    ctx = MagicMock()
-    path = MagicMock()
-    tool = Tool(ctx, path)
-    stdout = MagicMock()
-    stderr = MagicMock()
-    patched = patches(
-        "asyncio",
-        "str",
-        ("Tool.path",
-         dict(new_callable=PropertyMock)),
-        prefix="synca.mcp.common.tool")
-
-    with patched as (m_aio, m_str, m_path):
-        m_subproc = m_aio.create_subprocess_exec = AsyncMock()
-        proc = m_subproc.return_value
-        proc.communicate.return_value = (stdout, stderr)
-        assert (
-            await tool.execute(cmd)
-            == (stdout.decode.return_value,
-                stderr.decode.return_value,
-                proc.returncode))
-
-    assert (
-        m_subproc.call_args
-        == [cmd,
-            dict(
-                cwd=m_str.return_value,
-                stdout=m_aio.subprocess.PIPE,
-                stderr=m_aio.subprocess.PIPE)])
-    assert (
-        m_str.call_args
-        == [(m_path.return_value, ), {}])
-
-
 @pytest.mark.parametrize("args", [None, ["--ignore=E501"]])
 @pytest.mark.asyncio
 async def test_tool_handle(patches, args):
     """Test handle method with various parameters."""
     ctx = MagicMock()
-    path = MagicMock()
-    tool = Tool(ctx, path)
+    tool = Tool(ctx)
     patched = patches(
         "Tool.command",
         "Tool.execute",
         "Tool.parse_output",
-        "Tool.result",
+        "Tool.response",
         prefix="synca.mcp.common.tool")
 
     with patched as (m_build, m_exec, m_parse, m_format):
@@ -182,47 +64,190 @@ async def test_tool_handle(patches, args):
 def test_tool_parse_output(patches):
     """Test parse_output method."""
     ctx = MagicMock()
-    path = MagicMock()
-    tool = Tool(ctx, path)
+    tool = Tool(ctx)
     with pytest.raises(NotImplementedError):
         tool.parse_output(
             MagicMock(), MagicMock(), MagicMock())
 
 
-@pytest.mark.parametrize("issues_count", [0, 1, 5])
-def test_tool_result(patches, issues_count):
-    """Test result method with parametrized inputs."""
+def test_tool_response(patches):
+    """Test response method with parametrized inputs."""
     ctx = MagicMock()
-    path = MagicMock()
     output = MagicMock()
-    tool = Tool(ctx, path)
+    tool = Tool(ctx)
     info = MagicMock()
     return_code = MagicMock()
+    message = MagicMock()
+    assert (
+        tool.response(return_code, message, output, info)
+        == {
+            "data": {
+                "return_code": return_code,
+                "message": message,
+                "output": output,
+                "info": info,
+            }})
+
+
+@pytest.mark.parametrize(
+    "error",
+    [None,
+     BaseException])
+@pytest.mark.parametrize(
+    "args",
+    [(MagicMock(),),
+     (MagicMock(), MagicMock()),
+     ()])
+@pytest.mark.parametrize(
+    "kwargs",
+    [{"args": ["--check"], "verbose": False},
+     {"verbose": True},
+     {}])
+@pytest.mark.asyncio
+async def test_tool_run(patches, iters, args, kwargs, error):
+    """Test run() with parametrized arguments."""
+    ctx = MagicMock()
+    tool = Tool(ctx)
+    tool.__class__.__name__ = "CustomTool"
     patched = patches(
-        "str",
-        ("Tool.path",
-         dict(new_callable=PropertyMock)),
+        "traceback",
+        "Tool.handle",
+        prefix="synca.mcp.common.tool")
+
+    with patched as (m_tb, m_handle):
+        if error:
+            m_handle.side_effect = error("Test error")
+        assert (
+            await tool.run(*args, **kwargs)
+            == (m_handle.return_value
+                if not error
+                else dict(
+                    error=(
+                        "Failed to run custom: Test error\n"
+                        f"{m_tb.format_exc.return_value}"))))
+
+    assert (
+        m_handle.call_args
+        == [args, kwargs])
+    if error:
+        assert (
+            m_tb.format_exc.call_args
+            == [(), {}])
+        return
+    assert not m_tb.format_exc.called
+
+
+# CLITool
+
+def test_cli_tool_constructor():
+    """Test Tool class initialization."""
+    ctx = MagicMock()
+    path = MagicMock()
+    tool = CLITool(ctx, path)
+    assert isinstance(tool, Tool)
+    assert tool.ctx == ctx
+    assert tool._path_str == path
+    with pytest.raises(NotImplementedError):
+        tool.tool_name
+
+
+def test_cli_tool_path(patches):
+    """Test Tool path."""
+    ctx = MagicMock()
+    path = MagicMock()
+    tool = CLITool(ctx, path)
+    patched = patches(
         ("Tool.tool_name",
          dict(new_callable=PropertyMock)),
         prefix="synca.mcp.common.tool")
 
-    with patched as (m_str, m_path, m_tool):
+    with patched as (m_name, ):
         assert (
-            tool.result(return_code, issues_count, output, info)
-            == {
-                "success": True,
-                "data": {
-                    "return_code": return_code,
-                    "message": (
-                        f"Found {issues_count} issues "
-                        f"for {m_tool.return_value}"),
-                    "output": output,
-                    "project_path": m_str.return_value,
-                    "issues_count": issues_count,
-                    "info": info,
-                },
-                "error": None})
+            tool.tool_path
+            == m_name.return_value)
 
+
+def test_cli_tool_tool_path(patches):
+    """Test Tool path."""
+    ctx = MagicMock()
+    path = MagicMock()
+    tool = CLITool(ctx, path)
+    patched = patches(
+        "pathlib",
+        "CLITool.validate_path",
+        prefix="synca.mcp.common.tool")
+
+    with patched as (m_path, m_valid):
+        assert (
+            tool.path
+            == m_path.Path.return_value)
+
+    assert (
+        m_path.Path.call_args
+        == [(path, ), {}])
+    assert (
+        m_valid.call_args
+        == [(m_path.Path.return_value, ), {}])
+    assert "path" in tool.__dict__
+
+
+@pytest.mark.parametrize(
+    "args",
+    [None,
+     [MagicMock()],
+     [MagicMock(), MagicMock()]])
+def test_cli_tool_command(patches, args):
+    """Test command with parametrized arguments."""
+    path = "/test/path"
+    ctx = MagicMock()
+    path = MagicMock()
+    tool = CLITool(ctx, path)
+    patched = patches(
+        ("CLITool.tool_path",
+         dict(new_callable=PropertyMock)),
+        prefix="synca.mcp.common.tool")
+
+    with patched as (m_tool_path, ):
+        assert (
+            tool.command(args)
+            == [m_tool_path.return_value, *(args or [])])
+
+    assert "tool_path" not in tool.__dict__
+
+
+@pytest.mark.asyncio
+async def test_cli_tool_execute(patches):
+    """Test execute method."""
+    cmd = (MagicMock(), MagicMock(), MagicMock())
+    ctx = MagicMock()
+    path = MagicMock()
+    tool = CLITool(ctx, path)
+    stdout = MagicMock()
+    stderr = MagicMock()
+    patched = patches(
+        "asyncio",
+        "str",
+        ("CLITool.path",
+         dict(new_callable=PropertyMock)),
+        prefix="synca.mcp.common.tool")
+
+    with patched as (m_aio, m_str, m_path):
+        m_subproc = m_aio.create_subprocess_exec = AsyncMock()
+        proc = m_subproc.return_value
+        proc.communicate.return_value = (stdout, stderr)
+        assert (
+            await tool.execute(cmd)
+            == (stdout.decode.return_value,
+                stderr.decode.return_value,
+                proc.returncode))
+
+    assert (
+        m_subproc.call_args
+        == [cmd,
+            dict(
+                cwd=m_str.return_value,
+                stdout=m_aio.subprocess.PIPE,
+                stderr=m_aio.subprocess.PIPE)])
     assert (
         m_str.call_args
         == [(m_path.return_value, ), {}])
@@ -234,14 +259,14 @@ def test_tool_result(patches, issues_count):
 @pytest.mark.parametrize(
     "is_dir",
     [True, False])
-def test_tool_validate_path(patches, exists, is_dir):
+def test_cli_tool_validate_path(patches, exists, is_dir):
     """Test validate_path with parametrized existence and directory check."""
     patched = patches(
         "pathlib.Path",
         prefix="synca.mcp.common.tool")
     ctx = MagicMock()
     path = MagicMock()
-    tool = Tool(ctx, path)
+    tool = CLITool(ctx, path)
 
     with patched as (m_path, ):
         m_path.return_value.exists.return_value = exists
@@ -268,54 +293,3 @@ def test_tool_validate_path(patches, exists, is_dir):
         assert (
             e.value.args[0]
             == f"Path '{path}' is not a directory")
-
-
-@pytest.mark.parametrize(
-    "error",
-    [None,
-     BaseException])
-@pytest.mark.parametrize(
-    "args",
-    [(MagicMock(),),
-     (MagicMock(), MagicMock()),
-     ()])
-@pytest.mark.parametrize(
-    "kwargs",
-    [{"args": ["--check"], "verbose": False},
-     {"verbose": True},
-     {}])
-@pytest.mark.asyncio
-async def test_tool_run(patches, iters, args, kwargs, error):
-    """Test run() with parametrized arguments."""
-    ctx = MagicMock()
-    path = MagicMock()
-    tool = Tool(ctx, path)
-    tool.__class__.__name__ = "CustomTool"
-    patched = patches(
-        "traceback",
-        "Tool.handle",
-        prefix="synca.mcp.common.tool")
-
-    with patched as (m_tb, m_handle):
-        if error:
-            m_handle.side_effect = error("Test error")
-        assert (
-            await tool.run(*args, **kwargs)
-            == (m_handle.return_value
-                if not error
-                else dict(
-                    success=False,
-                    data=None,
-                    error=(
-                        "Failed to run custom: Test error\n"
-                        f"{m_tb.format_exc.return_value}"))))
-
-    assert (
-        m_handle.call_args
-        == [args, kwargs])
-    if error:
-        assert (
-            m_tb.format_exc.call_args
-            == [(), {}])
-        return
-    assert not m_tb.format_exc.called

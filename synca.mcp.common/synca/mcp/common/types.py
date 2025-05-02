@@ -36,6 +36,9 @@ class OutputInfoDict(TypedDict, total=False):
     statuses: NotRequired[dict[str, StatusDict] | None]
     coverage: NotRequired[CoverageDict | None]
 
+    project_path: NotRequired[str]
+    issues_count: NotRequired[int]
+
     needs_formatting: NotRequired[bool]
 
     compilation_output: NotRequired[str | None]
@@ -46,19 +49,16 @@ class OutputInfoDict(TypedDict, total=False):
     error_types: dict[str, int]
 
 
-OutputTuple: TypeAlias = tuple[int | None, int, str, OutputInfoDict]
+OutputTuple: TypeAlias = tuple[int, str, str, OutputInfoDict]
 
 
 class ResultDataDict(TypedDict):
     return_code: int
     message: str
     output: str
-    project_path: str
-    issues_count: int
     info: OutputInfoDict
 
 
 class ResultDict(TypedDict):
-    success: bool
     data: NotRequired[ResultDataDict | None]
     error: NotRequired[str | None]
