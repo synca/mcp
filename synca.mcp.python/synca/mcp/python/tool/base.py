@@ -1,9 +1,9 @@
 
 from synca.mcp.common.types import OutputTuple
-from synca.mcp.common.tool import CheckTool
+from synca.mcp.common.tool import CLICheckTool
 
 
-class PythonTool(CheckTool):
+class PythonTool(CLICheckTool):
 
     def parse_output(
             self,

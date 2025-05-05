@@ -10,10 +10,12 @@ def test_tool_flake8_constructor():
     """Test Flake8Tool class initialization."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = Flake8Tool(ctx, path)
+    args = MagicMock()
+    tool = Flake8Tool(ctx, path, args)
     assert isinstance(tool, Flake8Tool)
     assert isinstance(tool, PythonTool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "flake8"
     assert "tool_name" not in tool.__dict__
+    assert tool._args == args

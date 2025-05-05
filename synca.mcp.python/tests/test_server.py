@@ -1,7 +1,7 @@
 """Isolated tests for synca.mcp.python.server."""
 
 import inspect
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from mcp.server.fastmcp import FastMCP
@@ -26,77 +26,85 @@ async def test_tool_pytest(
     """Test each tool function to ensure it uses the right tool class."""
     ctx = MagicMock()
     path = MagicMock()
-    test_kwargs = dict(pytest_args=pytest_args)
-    expected = dict(
-        args=pytest_args if pytest_args is not None else None)
-    kwargs = {}
-    for k, v in test_kwargs.items():
-        if v is not None:
-            kwargs[k] = v
+    kwargs = (
+        dict(pytest_args=pytest_args)
+        if pytest_args is not None
+        else {})
+    expected = dict(args=pytest_args)
+    mock_run = AsyncMock()
     patched = patches(
-        "PytestTool.run",
+        "PytestTool",
         prefix="synca.mcp.python.server")
 
-    with patched as (m_run, ):
+    with patched as (m_tool, ):
+        m_tool.return_value.run = mock_run
         assert (
             await server.pytest(ctx, path, **kwargs)
-            == m_run.return_value)
+            == m_tool.return_value.run.return_value)
 
     assert (
-        m_run.call_args[1]
-        == expected)
-    assert m_run.call_args[0] == ()
+        m_tool.call_args
+        == [(ctx, path, expected), {}])
+    assert (
+        mock_run.call_args
+        == [(), {}])
 
 
-@pytest.mark.parametrize("args", [[], ["ARG1", "ARG2"], None])
+@pytest.mark.parametrize("mypy_args", [[], ["ARG1", "ARG2"], None])
 @pytest.mark.asyncio
-async def test_tool_mypy(patches, args):
+async def test_tool_mypy(patches, mypy_args):
     """Test the mypy tool function to ensure it uses the right tool class."""
     ctx = MagicMock()
     path = MagicMock()
-    test_kwargs = dict(mypy_args=args)
-    expected = dict(
-        args=args if args is not None else None)
-    kwargs = {}
-    for k, v in test_kwargs.items():
-        if v is not None:
-            kwargs[k] = v
+    kwargs = (
+        dict(mypy_args=mypy_args)
+        if mypy_args is not None
+        else {})
+    expected = dict(args=mypy_args)
+    mock_run = AsyncMock()
     patched = patches(
-        "MypyTool.run",
+        "MypyTool",
         prefix="synca.mcp.python.server")
 
-    with patched as (m_run, ):
+    with patched as (m_tool, ):
+        m_tool.return_value.run = mock_run
         assert (
             await server.mypy(ctx, path, **kwargs)
-            == m_run.return_value)
+            == m_tool.return_value.run.return_value)
 
     assert (
-        m_run.call_args[1]
-        == expected)
-    assert m_run.call_args[0] == ()
+        m_tool.call_args
+        == [(ctx, path, expected), {}])
+    assert (
+        mock_run.call_args
+        == [(), {}])
 
 
-@pytest.mark.parametrize("args", [[], ["ARG1", "ARG2"], None])
+@pytest.mark.parametrize("flake8_args", [[], ["ARG1", "ARG2"], None])
 @pytest.mark.asyncio
-async def test_tool_flake8(patches, args):
+async def test_tool_flake8(patches, flake8_args):
     """Test the flake8 tool function to ensure it uses the right tool class."""
     ctx = MagicMock()
     path = MagicMock()
-    test_kwargs = dict(flake8_args=args)
-    expected = dict(args=args)
-    kwargs = {}
-    for k, v in test_kwargs.items():
-        if v is not None:
-            kwargs[k] = v
+    kwargs = (
+        dict(flake8_args=flake8_args)
+        if flake8_args is not None
+        else {})
+    expected = dict(args=flake8_args)
+    mock_run = AsyncMock()
     patched = patches(
-        "Flake8Tool.run",
+        "Flake8Tool",
         prefix="synca.mcp.python.server")
 
-    with patched as (m_run, ):
+    with patched as (m_tool, ):
+        m_tool.return_value.run = mock_run
         assert (
             await server.flake8(ctx, path, **kwargs)
-            == m_run.return_value)
+            == m_tool.return_value.run.return_value)
 
     assert (
-        m_run.call_args
-        == [(), expected])
+        m_tool.call_args
+        == [(ctx, path, expected), {}])
+    assert (
+        mock_run.call_args
+        == [(), {}])

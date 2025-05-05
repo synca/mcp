@@ -4,18 +4,20 @@ from unittest.mock import MagicMock, PropertyMock
 import pytest
 
 from synca.mcp.python.tool.base import PythonTool
-from synca.mcp.common.tool import CheckTool
+from synca.mcp.common.tool import CLICheckTool
 
 
 def test_tool_python_constructor():
     """Test MypyTool class initialization."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = PythonTool(ctx, path)
+    args = MagicMock()
+    tool = PythonTool(ctx, path, args)
     assert isinstance(tool, PythonTool)
-    assert isinstance(tool, CheckTool)
+    assert isinstance(tool, CLICheckTool)
     assert tool.ctx == ctx
     assert tool._path_str == path
+    assert tool._args == args
 
 
 @pytest.mark.parametrize("stdout", ["", "OUT", "a:1\nb:2"])
@@ -26,7 +28,8 @@ def test_tool_python_parse_output(patches, return_code, stdout, stderr, issues):
     """Test parse_output method with various inputs."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = PythonTool(ctx, path)
+    args = MagicMock()
+    tool = PythonTool(ctx, path, args)
     combined_output = stdout + "\n" + stderr
     message = (
         f"Issues found: {issues}"
@@ -64,7 +67,8 @@ def test_tool_python_parse_issues(stdout, stderr):
     """Test parse_issues method with various inputs."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = PythonTool(ctx, path)
+    args = MagicMock()
+    tool = PythonTool(ctx, path, args)
 
     assert (
         tool.parse_issues(stdout, stderr)
