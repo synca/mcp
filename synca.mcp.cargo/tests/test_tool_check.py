@@ -12,13 +12,15 @@ def test_tool_check_constructor():
     """Test CheckTool class initialization."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = CheckTool(ctx, path)
+    args = MagicMock()
+    tool = CheckTool(ctx, path, args)
     assert isinstance(tool, CheckTool)
     assert isinstance(tool, CargoTool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "check"
     assert "tool_name" not in tool.__dict__
+    assert tool._args == args
 
 
 @pytest.mark.parametrize("return_code", [0, 1, None])
@@ -33,7 +35,8 @@ def test_check_parse_output(
     """Test the parse_output method of CheckTool with various inputs."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = CheckTool(ctx, path)
+    args = MagicMock()
+    tool = CheckTool(ctx, path, args)
     stdout = "Checking crate...\n"
     if has_finished:
         stdout += "Finished dev [unoptimized + debuginfo]\n"
@@ -119,7 +122,8 @@ def test_check_parse_issues(combined_output, expected):
     """Test the _parse_issues method with various inputs."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = CheckTool(ctx, path)
+    args = MagicMock()
+    tool = CheckTool(ctx, path, args)
     assert (
         tool.parse_issues(combined_output)
         == expected)

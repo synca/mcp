@@ -2,27 +2,25 @@
 
 import pathlib
 
-from synca.mcp.common.tool import CheckTool
+from synca.mcp.common.tool import CLICheckTool
 from synca.mcp.common.types import CommandTuple, IssuesTuple
 
 
-class CargoTool(CheckTool):
+class CargoTool(CLICheckTool):
     """Base class for Cargo tools."""
+
+    @property
+    def command(self) -> CommandTuple:
+        """Build the command with cargo prefix."""
+        return (
+            "cargo",
+            self.tool_name,
+            *self.args)
 
     @property
     def tool_path(self) -> str:
         """Return the tool name without cargo prefix."""
         return self.tool_name
-
-    def command(
-            self,
-            args: tuple[str, ...] | None = None) -> CommandTuple:
-        """Build the command with cargo prefix."""
-        return (
-            "cargo",
-            self.tool_name,
-            *self.config_args,
-            *(args or []))
 
     def parse_issues(
             self,

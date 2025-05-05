@@ -12,13 +12,15 @@ def test_tool_run_constructor():
     """Test RunTool class initialization."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = RunTool(ctx, path)
+    args = MagicMock()
+    tool = RunTool(ctx, path, args)
     assert isinstance(tool, RunTool)
     assert isinstance(tool, CargoTool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "run"
     assert "tool_name" not in tool.__dict__
+    assert tool._args == args
 
 
 @pytest.mark.parametrize("return_code", [0, 1, None])
@@ -36,7 +38,8 @@ def test_run_parse_output(
     """Test RunTool.parse_output method with various combinations of inputs."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = RunTool(ctx, path)
+    args = MagicMock()
+    tool = RunTool(ctx, path, args)
     stdout = "Program output here\n"
     if has_finished:
         stdout += "Finished dev [unoptimized + debuginfo]\n"
@@ -126,7 +129,8 @@ def test_extract_build_mode_from_line(dev_match, release_match, test_match):
     """Test _extract_build_mode_from_line correctly identifies build modes."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = RunTool(ctx, path)
+    args = MagicMock()
+    tool = RunTool(ctx, path, args)
     line = MagicMock()
     line.__contains__.side_effect = lambda x: (
         dev_match if x == "Finished dev" else
@@ -182,7 +186,8 @@ def test_extract_binary_name_from_line(
     """Test _extract_binary_name_from_line extracts binary names correctly."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = RunTool(ctx, path)
+    args = MagicMock()
+    tool = RunTool(ctx, path, args)
     line = MagicMock()
     line.__contains__.side_effect = lambda x: (
         running_text if x == "Running `" else
@@ -244,7 +249,8 @@ def test_extract_all(
     """Test _extract_all method extracts metadata from output correctly."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = RunTool(ctx, path)
+    args = MagicMock()
+    tool = RunTool(ctx, path, args)
     lines = [output_content] if output_content else []
     if has_running_line:
         running_line = "Running `target/debug/some-binary`"
@@ -346,7 +352,8 @@ def test_split_outputs(
     """
     ctx = MagicMock()
     path = MagicMock()
-    tool = RunTool(ctx, path)
+    args = MagicMock()
+    tool = RunTool(ctx, path, args)
     if running_line_idx is None:
         expected_compilation = None
         expected_program = "\n".join(lines)
@@ -398,7 +405,8 @@ def test_determine_error_type(errors, expected_type):
     """Test _determine_error_type correctly identifies error types."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = RunTool(ctx, path)
+    args = MagicMock()
+    tool = RunTool(ctx, path, args)
 
     assert (
         tool._determine_error_type(errors)

@@ -1,6 +1,6 @@
 """Isolated tests for synca.mcp.cargo.tool.clippy."""
 
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, PropertyMock
 
 import pytest
 
@@ -12,27 +12,42 @@ def test_tool_clippy_constructor():
     """Test ClippyTool class initialization."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = ClippyTool(ctx, path)
+    args = MagicMock()
+    tool = ClippyTool(ctx, path, args)
     assert isinstance(tool, ClippyTool)
     assert isinstance(tool, CargoTool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "clippy"
     assert "tool_name" not in tool.__dict__
+    assert tool._args == args
 
 
 @pytest.mark.parametrize("args", [True, False])
-def test_tool_clippy_command(args):
+def test_tool_clippy_command(patches, args):
     """Test the custom command building for clippy."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = ClippyTool(ctx, path)
+    args = MagicMock()
+    tool = ClippyTool(ctx, path, args)
     kwargs = {}
+    clippy_args = (
+        (MagicMock(), MagicMock())
+        if args
+        else ())
     if args:
         kwargs["args"] = MagicMock()
-    assert (
-        tool.command(**kwargs)
-        == ("cargo", "clippy"))
+    patched = patches(
+        ("ClippyTool.args",
+         dict(new_callable=PropertyMock)),
+        prefix="synca.mcp.cargo.tool.clippy")
+
+    with patched as (m_args, ):
+        m_args.return_value = clippy_args
+
+        assert (
+            tool.command
+            == ("cargo", "clippy", *clippy_args))
 
 
 @pytest.mark.parametrize("return_code", [0, 1, None])
@@ -46,7 +61,8 @@ def test_clippy_parse_output(
         patches, return_code, warnings, errors, resolutions, has_finished):
     ctx = MagicMock()
     path = MagicMock()
-    tool = ClippyTool(ctx, path)
+    args = MagicMock()
+    tool = ClippyTool(ctx, path, args)
     stdout = "Checking crate...\n"
     if has_finished:
         stdout += "Finished dev [unoptimized + debuginfo]\n"
@@ -141,7 +157,8 @@ def test_clippy_parse_output(
 def test_clippy_parse_issues(combined_output, expected):
     ctx = MagicMock()
     path = MagicMock()
-    tool = ClippyTool(ctx, path)
+    args = MagicMock()
+    tool = ClippyTool(ctx, path, args)
     assert (
         tool.parse_issues(combined_output)
         == expected)
@@ -184,7 +201,8 @@ def test_clippy_parse_issues(combined_output, expected):
 def test_clippy_categorize_issues(issues, issue_type, expected):
     ctx = MagicMock()
     path = MagicMock()
-    tool = ClippyTool(ctx, path)
+    args = MagicMock()
+    tool = ClippyTool(ctx, path, args)
     assert (
         tool._categorize_issues(issues, issue_type)
         == expected)
