@@ -15,7 +15,7 @@ def test_sed_tool_constructor():
     assert isinstance(tool, UnixTool)
     assert tool.ctx == ctx
     assert tool._path_str == path
-    assert tool.args == args
+    assert tool._args == args
     assert tool.success_message == "Successfully ran the sed command"
 
 

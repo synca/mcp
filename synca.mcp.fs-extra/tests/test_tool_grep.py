@@ -15,7 +15,7 @@ def test_grep_tool_constructor():
     assert isinstance(tool, UnixTool)
     assert tool.ctx == ctx
     assert tool._path_str == path
-    assert tool.args == args
+    assert tool._args == args
 
 
 def test_grep_tool_tool_name():

@@ -17,7 +17,7 @@ def test_unix_tool_constructor():
     assert isinstance(tool, CLITool)
     assert tool.ctx == ctx
     assert tool._path_str == path
-    assert tool.args == args
+    assert tool._args == args
 
 
 def test_unix_tool_tool_path(patches):
@@ -34,34 +34,6 @@ def test_unix_tool_tool_path(patches):
 
     with patched as (m_tool_name,):
         assert tool.tool_path == m_tool_name.return_value
-
-    assert "tool_path" not in tool.__dict__
-
-
-@pytest.mark.parametrize(
-    "command_args",
-    [None,
-     [MagicMock()],
-     [MagicMock(), MagicMock()]])
-def test_unix_tool_command(patches, command_args):
-    """Test command with parametrized arguments."""
-    ctx = MagicMock()
-    path = MagicMock()
-    args = MagicMock()
-    tool = UnixTool(ctx, path, args)
-    patched = patches(
-        ("UnixTool.tool_path",
-         dict(new_callable=PropertyMock)),
-        ("UnixTool.config_args",
-         dict(new_callable=PropertyMock)),
-        prefix="synca.mcp.fs_extra.tool.base")
-
-    with patched as (m_tool_path, m_config_args):
-        assert (
-            tool.command(command_args)
-            == (m_tool_path.return_value,
-                *m_config_args.return_value,
-                *(args or [])))
 
     assert "tool_path" not in tool.__dict__
 

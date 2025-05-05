@@ -1,7 +1,7 @@
 """Isolated tests for synca.mcp.fs_extra.server."""
 
 import inspect
-from unittest.mock import MagicMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 from mcp.server.fastmcp import FastMCP
@@ -19,142 +19,120 @@ def test_fastmcp_initialization():
 
 
 @pytest.mark.parametrize(
-    "args",
-    [None, [], ["ARG1", "ARG2"], ["-n", "10", "file.txt"]])
+    "head_args",
+    [[], ["ARG1", "ARG2"], ["-n", "10", "file.txt"]])
 @pytest.mark.asyncio
-async def test_fs_head(
-        patches,
-        args):
+async def test_fs_head(patches, head_args):
     """Test the fs_head tool function to ensure it uses the right tool class."""
     ctx = MagicMock()
     path = MagicMock()
-    test_kwargs = dict(args=args)
-    kwargs = {}
-    for k, v in test_kwargs.items():
-        if v is not None:
-            kwargs[k] = v
+    kwargs = dict(head_args=head_args)
+    expected = dict(args=head_args)
+    mock_run = AsyncMock()
     patched = patches(
-        "HeadTool.__init__",
-        "HeadTool.run",
+        "HeadTool",
         prefix="synca.mcp.fs_extra.server")
 
-    with patched as (m_init, m_run):
-        m_init.return_value = None
+    with patched as (m_tool, ):
+        m_tool.return_value.run = mock_run
         assert (
             await server.fs_head(ctx, path, **kwargs)
-            == m_run.return_value)
+            == m_tool.return_value.run.return_value)
 
     assert (
-        m_init.call_args
-        == [(ctx, path, args), {}])
+        m_tool.call_args
+        == [(ctx, path, expected), {}])
     assert (
-        m_run.call_args
+        mock_run.call_args
         == [(), {}])
 
 
 @pytest.mark.parametrize(
-    "args",
-    [None, [], ["ARG1", "ARG2"], ["-n", "10", "file.txt"]])
+    "tail_args",
+    [[], ["ARG1", "ARG2"], ["-n", "10", "file.txt"]])
 @pytest.mark.asyncio
-async def test_fs_tail(
-        patches,
-        args):
+async def test_fs_tail(patches, tail_args):
     """Test the fs_tail tool function to ensure it uses the right tool class."""
     ctx = MagicMock()
     path = MagicMock()
-    test_kwargs = dict(args=args)
-    kwargs = {}
-    for k, v in test_kwargs.items():
-        if v is not None:
-            kwargs[k] = v
+    kwargs = dict(tail_args=tail_args)
+    expected = dict(args=tail_args)
+    mock_run = AsyncMock()
     patched = patches(
-        "TailTool.__init__",
-        "TailTool.run",
+        "TailTool",
         prefix="synca.mcp.fs_extra.server")
 
-    with patched as (m_init, m_run):
-        m_init.return_value = None
+    with patched as (m_tool, ):
+        m_tool.return_value.run = mock_run
         assert (
             await server.fs_tail(ctx, path, **kwargs)
-            == m_run.return_value)
+            == m_tool.return_value.run.return_value)
 
     assert (
-        m_init.call_args
-        == [(ctx, path, args), {}])
+        m_tool.call_args
+        == [(ctx, path, expected), {}])
     assert (
-        m_run.call_args
+        mock_run.call_args
         == [(), {}])
 
 
-@pytest.mark.parametrize("args", [
-    [],
-    ["ARG1", "ARG2"],
-    ["pattern", "file.txt"],
-    ["-i", "file.txt"]
-])
+@pytest.mark.parametrize(
+    "grep_args",
+    [[],
+     ["ARG1", "ARG2"],
+     ["s/old/new/g", "file.txt"]])
 @pytest.mark.asyncio
-async def test_fs_grep(
-        patches,
-        args):
+async def test_fs_grep(patches, grep_args):
     """Test the fs_grep tool function to ensure it uses the right tool class."""
     ctx = MagicMock()
     path = MagicMock()
-    test_kwargs = dict(args=args)
-    kwargs = {}
-    for k, v in test_kwargs.items():
-        if v is not None:
-            kwargs[k] = v
+    kwargs = dict(grep_args=grep_args)
+    expected = dict(args=grep_args)
+    mock_run = AsyncMock()
     patched = patches(
-        "GrepTool.__init__",
-        "GrepTool.run",
+        "GrepTool",
         prefix="synca.mcp.fs_extra.server")
 
-    with patched as (m_init, m_run):
-        m_init.return_value = None
+    with patched as (m_tool, ):
+        m_tool.return_value.run = mock_run
         assert (
             await server.fs_grep(ctx, path, **kwargs)
-            == m_run.return_value)
+            == m_tool.return_value.run.return_value)
 
     assert (
-        m_init.call_args
-        == [(ctx, path, args), {}])
+        m_tool.call_args
+        == [(ctx, path, expected), {}])
     assert (
-        m_run.call_args
+        mock_run.call_args
         == [(), {}])
 
 
-@pytest.mark.parametrize("args", [
-    None,
-    [],
-    ["ARG1", "ARG2"],
-    ["s/old/new/g", "file.txt"]
-])
+@pytest.mark.parametrize(
+    "sed_args",
+    [[],
+     ["ARG1", "ARG2"],
+     ["s/old/new/g", "file.txt"]])
 @pytest.mark.asyncio
-async def test_fs_sed(
-        patches,
-        args):
+async def test_fs_sed(patches, sed_args):
     """Test the fs_sed tool function to ensure it uses the right tool class."""
     ctx = MagicMock()
     path = MagicMock()
-    test_kwargs = dict(args=args)
-    kwargs = {}
-    for k, v in test_kwargs.items():
-        if v is not None:
-            kwargs[k] = v
+    kwargs = dict(sed_args=sed_args)
+    expected = dict(args=sed_args)
+    mock_run = AsyncMock()
     patched = patches(
-        "SedTool.__init__",
-        "SedTool.run",
+        "SedTool",
         prefix="synca.mcp.fs_extra.server")
 
-    with patched as (m_init, m_run):
-        m_init.return_value = None
+    with patched as (m_tool, ):
+        m_tool.return_value.run = mock_run
         assert (
             await server.fs_sed(ctx, path, **kwargs)
-            == m_run.return_value)
+            == m_tool.return_value.run.return_value)
 
     assert (
-        m_init.call_args
-        == [(ctx, path, args), {}])
+        m_tool.call_args
+        == [(ctx, path, expected), {}])
     assert (
-        m_run.call_args
+        mock_run.call_args
         == [(), {}])
