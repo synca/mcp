@@ -12,13 +12,15 @@ def test_tool_fmt_constructor():
     """Test FmtTool class initialization."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = FmtTool(ctx, path)
+    args = MagicMock()
+    tool = FmtTool(ctx, path, args)
     assert isinstance(tool, FmtTool)
     assert isinstance(tool, CargoTool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "fmt"
     assert "tool_name" not in tool.__dict__
+    assert tool._args == args
 
 
 @pytest.mark.parametrize("has_diffs", [True, False])
@@ -28,7 +30,8 @@ def test_fmt_parse_output(patches, has_diffs, return_code, empty_output):
     """Test the parse_output method of FmtTool."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = FmtTool(ctx, path)
+    args = MagicMock()
+    tool = FmtTool(ctx, path, args)
     stderr = ""
     stdout = (
         ("Diff in src/main.rs at line 10:\n"

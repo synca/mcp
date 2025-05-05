@@ -15,15 +15,15 @@ mcp = FastMCP("Cargo")
 @mcp.tool()
 async def cargo_clippy(
         ctx: Context,
-        path: str,
-        args: list[str] | None = None) -> ResultDict:
+        cwd: str,
+        clippy_args: tuple[str, ...] | None = None) -> ResultDict:
     """Run cargo clippy on a Rust project
 
     Executes clippy linter on the specified Rust project path.
 
     Args:
-        path: Path to a Rust project containing a Cargo.toml file
-        args: Optional list of additional arguments to pass to clippy
+        cwd: Path to a Rust project containing a Cargo.toml file
+        clippy_args: Optional list of additional arguments to pass to clippy
              Examples: ["--no-deps", "--workspace", "--", "-D", "warnings"]
 
     Returns:
@@ -48,14 +48,14 @@ async def cargo_clippy(
             "error": str | None
         }
     """
-    return await ClippyTool(ctx, path).run(args)
+    return await ClippyTool(ctx, cwd, dict(args=clippy_args)).run()
 
 
 @mcp.tool()
 async def cargo_check(
         ctx: Context,
-        path: str,
-        args: list[str] | None = None) -> ResultDict:
+        cwd: str,
+        check_args: tuple[str, ...] | None = None) -> ResultDict:
     """Run cargo check on a Rust project
 
     Checks a package for errors without building it.
@@ -83,21 +83,22 @@ async def cargo_check(
             "error": str | None
         }
     """
-    return await CheckTool(ctx, path).run(args)
+    return await CheckTool(ctx, cwd, dict(args=check_args)).run()
 
 
 @mcp.tool()
 async def cargo_build(
         ctx: Context,
-        path: str,
-        args: list[str] | None = None) -> ResultDict:
+        cwd: str,
+        build_args: tuple[str, ...] | None = None) -> ResultDict:
     """Build a Rust project
 
     Compiles a package and all of its dependencies.
 
     Args:
-        path: Path to a Rust project containing a Cargo.toml file
-        args: Optional list of additional arguments to pass to cargo build
+        cwd: Path to a Rust project containing a Cargo.toml file
+        build_args: Optional list of additional arguments to pass
+                    to cargo build
              Examples: ["--release", "--workspace", "--all-features", "--lib"]
 
     Returns:
@@ -120,21 +121,21 @@ async def cargo_build(
             "error": str | None
         }
     """
-    return await BuildTool(ctx, path).run(args)
+    return await BuildTool(ctx, cwd, dict(args=build_args)).run()
 
 
 @mcp.tool()
 async def cargo_test(
         ctx: Context,
-        path: str,
-        args: list[str] | None = None) -> ResultDict:
+        cwd: str,
+        test_args: tuple[str, ...] | None = None) -> ResultDict:
     """Run tests for a Rust project
 
     Executes all unit and integration tests for a package.
 
     Args:
-        path: Path to a Rust project containing a Cargo.toml file
-        args: Optional list of additional arguments to pass to cargo test
+        cwd: Path to a Rust project containing a Cargo.toml file
+        test_args: Optional list of additional arguments to pass to cargo test
              Examples: ["--release", "--no-fail-fast", "--verbose"]
              Test name patterns can also be passed directly in args
 
@@ -167,21 +168,21 @@ async def cargo_test(
             "error": str | None
         }
     """
-    return await TestTool(ctx, path).run(args)
+    return await TestTool(ctx, cwd, dict(args=test_args)).run()
 
 
 @mcp.tool()
 async def cargo_fmt(
         ctx: Context,
-        path: str,
-        args: list[str] | None = None) -> ResultDict:
+        cwd: str,
+        fmt_args: tuple[str, ...] | None = None) -> ResultDict:
     """Format Rust code using rustfmt
 
     Formats Rust code according to style guidelines using rustfmt.
 
     Args:
-        path: Path to a Rust project containing a Cargo.toml file
-        args: Optional list of additional arguments to pass to cargo fmt
+        cwd: Path to a Rust project containing a Cargo.toml file
+        fmt_args: Optional list of additional arguments to pass to cargo fmt
              Examples:
                  ["--manifest-path=path/to/Cargo.toml", "--all", "--check"]
 
@@ -205,21 +206,21 @@ async def cargo_fmt(
             "error": str | None
         }
     """
-    return await FmtTool(ctx, path).run(args)
+    return await FmtTool(ctx, cwd, dict(args=fmt_args)).run()
 
 
 @mcp.tool()
 async def cargo_doc(
         ctx: Context,
-        path: str,
-        args: list[str] | None = None) -> ResultDict:
+        cwd: str,
+        doc_args: tuple[str, ...] | None = None) -> ResultDict:
     """Generate documentation for a Rust project
 
     Builds documentation for the local package and all dependencies.
 
     Args:
-        path: Path to a Rust project containing a Cargo.toml file
-        args: Optional list of additional arguments to pass to cargo doc
+        cwd: Path to a Rust project containing a Cargo.toml file
+        doc_args: Optional list of additional arguments to pass to cargo doc
              Examples:
                  ["--no-deps", "--document-private-items", "--lib", "--open"]
 
@@ -245,14 +246,14 @@ async def cargo_doc(
             "error": str | None
         }
     """
-    return await DocTool(ctx, path).run(args)
+    return await DocTool(ctx, cwd, dict(args=doc_args)).run()
 
 
 @mcp.tool()
 async def cargo_run(
         ctx: Context,
-        path: str,
-        args: list[str] | None = None) -> ResultDict:
+        cwd: str,
+        run_args: tuple[str, ...] | None = None) -> ResultDict:
     """Run a Rust project binary
 
     Compiles and runs the main binary or a specified binary.
@@ -289,21 +290,22 @@ async def cargo_run(
             "error": str | None
         }
     """
-    return await RunTool(ctx, path).run(args)
+    return await RunTool(ctx, cwd, dict(args=run_args)).run()
 
 
 @mcp.tool()
 async def cargo_tarpaulin(
         ctx: Context,
-        path: str,
-        args: list[str] | None = None) -> ResultDict:
+        cwd: str,
+        tarpaulin_args: tuple[str, ...] | None = None) -> ResultDict:
     """Run code coverage analysis using cargo-tarpaulin
 
     Measures code coverage of tests in a Rust project.
 
     Args:
-        path: Path to a Rust project containing a Cargo.toml file
-        args: Optional list of additional arguments to pass to tarpaulin
+        cwd: Path to a Rust project containing a Cargo.toml file
+        tarpaulin_args: Optional list of additional arguments to pass
+                        to tarpaulin
           Examples:
             ["--workspace", "--exclude-files=**/tests/**", "--fail-under=80"]
 
@@ -332,4 +334,4 @@ async def cargo_tarpaulin(
             "error": str | None
         }
     """
-    return await TarpaulinTool(ctx, path).run(args)
+    return await TarpaulinTool(ctx, cwd, dict(args=tarpaulin_args)).run()

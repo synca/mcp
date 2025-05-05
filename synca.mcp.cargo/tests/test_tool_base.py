@@ -12,18 +12,21 @@ def test_tool_base_constructor():
     """Test CargoTool class initialization."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = CargoTool(ctx, path)
+    args = MagicMock()
+    tool = CargoTool(ctx, path, args)
     assert isinstance(tool, CargoTool)
     assert isinstance(tool, CLITool)
     assert tool.ctx == ctx
     assert tool._path_str == path
+    assert tool._args == args
 
 
 def test_tool_path(patches):
     """Test the tool_path property."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = CargoTool(ctx, path)
+    args = MagicMock()
+    tool = CargoTool(ctx, path, args)
 
     patched = patches(
         ("CargoTool.tool_name",
@@ -41,7 +44,8 @@ def test_validate_path(patches, is_project):
     """Test validate_path method."""
     ctx = MagicMock()
     path_str = MagicMock()
-    tool = CargoTool(ctx, path_str)
+    args = MagicMock()
+    tool = CargoTool(ctx, path_str, args)
     path = MagicMock()
     patched = patches(
         "super",
@@ -124,7 +128,8 @@ def test_base_parse_issues(
     """
     ctx = MagicMock()
     path = MagicMock()
-    tool = CargoTool(ctx, path)
+    args = MagicMock()
+    tool = CargoTool(ctx, path, args)
     kwargs = (
         dict(additional_errors=["custom error pattern"])
         if additional_errors

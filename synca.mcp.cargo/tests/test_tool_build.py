@@ -12,13 +12,15 @@ def test_tool_build_constructor():
     """Test BuildTool class initialization."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = BuildTool(ctx, path)
+    args = MagicMock()
+    tool = BuildTool(ctx, path, args)
     assert isinstance(tool, BuildTool)
     assert isinstance(tool, CargoTool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "build"
     assert "tool_name" not in tool.__dict__
+    assert tool._args == args
 
 
 @pytest.mark.parametrize("return_code", [0, 1, None])
@@ -35,7 +37,8 @@ def test_build_parse_output(
         mode, timing, statuses):
     ctx = MagicMock()
     path = MagicMock()
-    tool = BuildTool(ctx, path)
+    args = MagicMock()
+    tool = BuildTool(ctx, path, args)
     stdout = "stdout content"
     stderr = "stderr content"
     if has_finished:
@@ -124,7 +127,8 @@ def test_extract_mode(combined_output, expected):
     """Test _extract_mode correctly identifies debug/release mode."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = BuildTool(ctx, path)
+    args = MagicMock()
+    tool = BuildTool(ctx, path, args)
     assert (
         tool._extract_mode(combined_output)
         == expected)
@@ -152,7 +156,8 @@ def test_extract_timing(patches, combined_output, line_args, status_return):
     """Test _extract_timing extracts timing information correctly."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = BuildTool(ctx, path)
+    args = MagicMock()
+    tool = BuildTool(ctx, path, args)
     patched = patches(
         "BuildTool._status_finished",
         prefix="synca.mcp.cargo.tool.build")
@@ -194,7 +199,8 @@ def test_status_finished(error, finished):
     """
     ctx = MagicMock()
     path = MagicMock()
-    tool = BuildTool(ctx, path)
+    args = MagicMock()
+    tool = BuildTool(ctx, path, args)
     line = MagicMock()
     time_part = (
         line.split.return_value
@@ -256,7 +262,8 @@ def test_extract_target_statuses(patches, combined_output, expected):
     """Test _extract_target_statuses extracts compilation status correctly."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = BuildTool(ctx, path)
+    args = MagicMock()
+    tool = BuildTool(ctx, path, args)
     patched = patches(
         "BuildTool._status_compiling",
         "BuildTool._status_fresh",
@@ -302,7 +309,8 @@ def test_status_compiling(error, parts_len):
     """Test _status_compiling extracts compiling status correctly."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = BuildTool(ctx, path)
+    args = MagicMock()
+    tool = BuildTool(ctx, path, args)
     line = MagicMock()
     if error:
         line.split.side_effect = error("Test error")
@@ -362,7 +370,8 @@ def test_status_fresh(error, parts_len):
     """Test _status_fresh extracts fresh status correctly."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = BuildTool(ctx, path)
+    args = MagicMock()
+    tool = BuildTool(ctx, path, args)
     line = MagicMock()
     if error:
         line.split.side_effect = error("Test error")

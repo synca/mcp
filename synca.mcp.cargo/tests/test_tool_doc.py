@@ -12,13 +12,15 @@ def test_tool_doc_constructor():
     """Test DocTool class initialization."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = DocTool(ctx, path)
+    args = MagicMock()
+    tool = DocTool(ctx, path, args)
     assert isinstance(tool, DocTool)
     assert isinstance(tool, CargoTool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "doc"
     assert "tool_name" not in tool.__dict__
+    assert tool._args == args
 
 
 @pytest.mark.parametrize("return_code", [0, 1, None])
@@ -33,7 +35,8 @@ def test_doc_parse_output(
     """Test the parse_output method for DocTool."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = DocTool(ctx, path)
+    args = MagicMock()
+    tool = DocTool(ctx, path, args)
     stdout = "stdout content"
     stderr = "stderr content"
     if has_finished:
@@ -105,7 +108,8 @@ def test_doc_extract_package_name(patches, content, expected):
     """Test _extract_package_name extracts the package name from Cargo.toml."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = DocTool(ctx, path)
+    args = MagicMock()
+    tool = DocTool(ctx, path, args)
     mock_path = MagicMock()
     tool.path = mock_path
     mock_cargo_toml = MagicMock()

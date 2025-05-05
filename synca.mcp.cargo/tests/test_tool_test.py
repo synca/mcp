@@ -12,13 +12,15 @@ def test_tool_test_constructor():
     """Test TestTool class initialization."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = TestTool(ctx, path)
+    args = MagicMock()
+    tool = TestTool(ctx, path, args)
     assert isinstance(tool, TestTool)
     assert isinstance(tool, CargoTool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "test"
     assert "tool_name" not in tool.__dict__
+    assert tool._args == args
 
 
 @pytest.mark.parametrize("return_code", [0, 1, None])
@@ -35,7 +37,8 @@ def test_tool_test_parse_output(
     """Test parse_output method with various inputs."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = TestTool(ctx, path)
+    args = MagicMock()
+    tool = TestTool(ctx, path, args)
     stdout = "Test output"
     stderr = "Test error output"
     warnings_count = len(warnings)
@@ -107,7 +110,8 @@ def test_tool_test_extract_summary(patches, combined_output, expected):
     """Test _extract_summary method with various outputs."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = TestTool(ctx, path)
+    args = MagicMock()
+    tool = TestTool(ctx, path, args)
     patched = patches(
         "TestTool._parse_success_result",
         "TestTool._parse_failure_result",
@@ -149,7 +153,8 @@ def test_tool_test_parse_success_result(patches, error, line, expected_count):
     """Test _parse_success_result with various inputs and error types."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = TestTool(ctx, path)
+    args = MagicMock()
+    tool = TestTool(ctx, path, args)
     mock_line = MagicMock()
     parts = line.split()
     expected = (
@@ -204,7 +209,8 @@ def test_tool_test_parse_failure_result(
     """Test _parse_failure_result with various inputs and error types."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = TestTool(ctx, path)
+    args = MagicMock()
+    tool = TestTool(ctx, path, args)
     mock_line = MagicMock()
     parts = line.split()
     expected_total = expected_passed + expected_failed

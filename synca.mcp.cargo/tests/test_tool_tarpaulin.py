@@ -12,13 +12,15 @@ def test_tool_tarpaulin_constructor():
     """Test TarpaulinTool class initialization."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = TarpaulinTool(ctx, path)
+    args = MagicMock()
+    tool = TarpaulinTool(ctx, path, args)
     assert isinstance(tool, TarpaulinTool)
     assert isinstance(tool, CargoTool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "tarpaulin"
     assert "tool_name" not in tool.__dict__
+    assert tool._args == args
 
 
 @pytest.mark.parametrize(
@@ -40,7 +42,8 @@ def test_tool_tarpaulin_parse_output(
     """Test TarpaulinTool.parse_output method with various inputs."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = TarpaulinTool(ctx, path)
+    args = MagicMock()
+    tool = TarpaulinTool(ctx, path, args)
     combined_output = stdout + "\n" + stderr
     mock_warnings = (
         ["warning: unused variable"]
@@ -120,7 +123,8 @@ def test_tool_tarpaulin_parse_issues(patches, additional_error_matches):
     """Test TarpaulinTool.parse_issues method."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = TarpaulinTool(ctx, path)
+    args = MagicMock()
+    tool = TarpaulinTool(ctx, path, args)
     output = "output content"
     additional_errors = [
         "failed to execute",
@@ -164,7 +168,8 @@ def test_tool_tarpaulin_extract_coverage_percentage(
     """
     ctx = MagicMock()
     path = MagicMock()
-    tool = TarpaulinTool(ctx, path)
+    args = MagicMock()
+    tool = TarpaulinTool(ctx, path, args)
     line = MagicMock()
     if percent_value == "":
         line.split.return_value = []
@@ -242,7 +247,8 @@ def test_tool_tarpaulin_extract_coverage(patches, output, expected):
     """Test _extract_coverage method with various inputs."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = TarpaulinTool(ctx, path)
+    args = MagicMock()
+    tool = TarpaulinTool(ctx, path, args)
 
     # Setup mock side effects
     def mock_percentage(line):
@@ -349,7 +355,8 @@ def test_tool_tarpaulin_extract_output_file(patches, line, expected, error):
     """Test _extract_output_file method with various inputs and errors."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = TarpaulinTool(ctx, path)
+    args = MagicMock()
+    tool = TarpaulinTool(ctx, path, args)
     line_mock = MagicMock()
 
     # Empty split result will cause IndexError
