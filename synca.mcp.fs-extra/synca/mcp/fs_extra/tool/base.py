@@ -1,9 +1,7 @@
 """Base Tool class for Unix file tools."""
 
-from mcp.server.fastmcp import Context
-
 from synca.mcp.common.tool import CLITool
-from synca.mcp.common.types import CommandTuple, OutputTuple
+from synca.mcp.common.types import OutputTuple
 
 
 class UnixTool(CLITool):
@@ -20,27 +18,6 @@ class UnixTool(CLITool):
     """
     failure_message = ""
     success_message = ""
-
-    def __init__(self, ctx: Context, path: str, args) -> None:
-        """Initialize the tool with context and path.
-        """
-        self.ctx = ctx
-        self._path_str = path
-        self.args = args
-
-    @property
-    def tool_path(self) -> str:
-        """Return the tool executable name."""
-        return self.tool_name
-
-    def command(
-            self,
-            args: tuple[str, ...] | None = None) -> CommandTuple:
-        """Build the tool command."""
-        return (
-            self.tool_path,
-            *self.config_args,
-            *(self.args or []))
 
     def parse_output(
             self,

@@ -17,8 +17,8 @@ mcp = FastMCP("FS-Extra")
 @mcp.tool()
 async def fs_head(
         ctx: Context,
-        path: str,
-        args: list[str] | None = None) -> ResultDict:
+        cwd: str,
+        head_args: tuple[str]) -> ResultDict:
     """Display the beginning of a file.
 
     Wraps the Unix 'head' command to display the first part of files.
@@ -37,12 +37,13 @@ async def fs_head(
         1000 bytes
 
     Args:
-        path: Directory path from which to run the head command
-              (working directory)
-        args: Optional list of arguments to pass directly to the head command
-              These arguments are passed through exactly as provided
-              The file path should be included in the args parameter
-              See 'man head' for all available options
+        cwd: Directory path from which to run the head command
+             (working directory)
+        head_args: list of arguments to pass directly to the head
+                   command.
+                   These arguments are passed through exactly as provided
+                   The file path should be included in the args parameter
+                   See 'man head' for all available options
 
     Returns:
         A dictionary with the following structure:
@@ -59,14 +60,14 @@ async def fs_head(
             "error": str | None
         }
     """
-    return await HeadTool(ctx, path, args).run()
+    return await HeadTool(ctx, cwd, dict(args=head_args)).run()
 
 
 @mcp.tool()
 async def fs_tail(
         ctx: Context,
-        path: str,
-        args: list[str] | None = None) -> ResultDict:
+        cwd: str,
+        tail_args: tuple[str]) -> ResultDict:
     """Display the end of a file.
 
     Wraps the Unix 'tail' command to display the last part of files.
@@ -75,7 +76,7 @@ async def fs_tail(
 
     Note:
       For platform-specific information, use args=["--help"] or
-      args=["--version"] as behavior and available options may vary across
+      tail_args=["--version"] as behavior and available options may vary across
       systems.
 
     Common usages:
@@ -86,12 +87,13 @@ async def fs_tail(
       - Follow mode: pass args=["-f", "filename.txt"] to follow file updates
 
     Args:
-        path: Directory path from which to run the tail command
+        cwd: Directory path from which to run the tail command
               (working directory)
-        args: Optional list of arguments to pass directly to the tail command
-              These arguments are passed through exactly as provided
-              The file path should be included in the args parameter
-              See 'man tail' for all available options
+        tail_args: list of arguments to pass directly to the tail
+                   command.
+                   These arguments are passed through exactly as provided
+                   The file path should be included in the args parameter
+                   See 'man tail' for all available options
 
     Returns:
         A dictionary with the following structure:
@@ -108,14 +110,14 @@ async def fs_tail(
             "error": str | None
         }
     """
-    return await TailTool(ctx, path, args).run()
+    return await TailTool(ctx, cwd, dict(args=tail_args)).run()
 
 
 @mcp.tool()
 async def fs_grep(
         ctx: Context,
-        path: str,
-        args: list[str]) -> ResultDict:
+        cwd: str,
+        grep_args: tuple[str]) -> ResultDict:
     """Search for patterns in a file or directory.
 
     Wraps the Unix 'grep' command to search for patterns in files.
@@ -140,12 +142,12 @@ async def fs_grep(
         by grep
 
     Args:
-        path: Directory path from which to run the grep command
+        cwd: Directory path from which to run the grep command
               (working directory)
-        args: list of arguments to pass directly to the grep command
-              These arguments are passed through exactly as provided
-              The file or directory to search should be included in the args
-              parameter
+        grep_args: list of arguments to pass directly to the grep command
+                   These arguments are passed through exactly as provided
+                   The file or directory to search should be included in the
+                   args parameter
 
     Returns:
         A dictionary with the following structure:
@@ -161,14 +163,14 @@ async def fs_grep(
             "error": str | None
         }
     """
-    return await GrepTool(ctx, path, args).run()
+    return await GrepTool(ctx, cwd, dict(args=grep_args)).run()
 
 
 @mcp.tool()
 async def fs_sed(
         ctx: Context,
-        path: str,
-        args: list[str] | None = None) -> ResultDict:
+        cwd: str,
+        sed_args: tuple[str]) -> ResultDict:
     """Perform text transformations on a file.
 
     Wraps the Unix 'sed' command to transform text in files and extract content.
@@ -197,12 +199,12 @@ async def fs_sed(
         lines 10-20
 
     Args:
-        path: Directory path from which to run the sed command
+        cwd: Directory path from which to run the sed command
               (working directory)
-        args: Optional list of arguments to pass directly to the sed command
-              These arguments are passed through exactly as provided
-              The file path should be included in the args parameter
-              See 'man sed' for all available options
+        sed_args: list of arguments to pass directly to the sed command
+                  These arguments are passed through exactly as provided
+                  The file path should be included in the args parameter
+                  See 'man sed' for all available options
 
     Returns:
         A dictionary with the following structure:
@@ -217,4 +219,4 @@ async def fs_sed(
             "error": str | None
         }
     """
-    return await SedTool(ctx, path, args).run()
+    return await SedTool(ctx, cwd, dict(args=sed_args)).run()

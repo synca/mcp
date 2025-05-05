@@ -6,9 +6,12 @@ Filesystem Extras MCP server
 
 ## Overview
 
-This package provides an MCP server for filesystem-related tools, including the following:
+This package provides an MCP server for filesystem-related tools:
 
-- **hello_world**: A simple hello world example tool
+- head
+- tail
+- grep
+- sed
 
 ## Development
 

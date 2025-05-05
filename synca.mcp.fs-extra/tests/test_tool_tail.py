@@ -15,7 +15,7 @@ def test_tail_tool_constructor():
     assert isinstance(tool, UnixSliceTool)
     assert tool.ctx == ctx
     assert tool._path_str == path
-    assert tool.args == args
+    assert tool._args == args
     assert tool.success_message == "Successfully read the end of file"
 
 
