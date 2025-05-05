@@ -17,14 +17,14 @@ async def test_http_tool_constructor():
     assert isinstance(tool, Tool)
     assert tool.ctx == ctx
     assert tool._args == args
-    assert tool.args == args
-    assert "args" not in tool.__dict__
     with pytest.raises(NotImplementedError):
         tool.tool_name
     with pytest.raises(NotImplementedError):
         tool.request_data
     with pytest.raises(NotImplementedError):
         await tool.request(MagicMock())
+    with pytest.raises(NotImplementedError):
+        await tool.args
 
 
 @pytest.mark.asyncio

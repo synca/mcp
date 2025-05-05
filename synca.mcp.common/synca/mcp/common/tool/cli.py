@@ -6,6 +6,8 @@ from mcp.server.fastmcp import Context
 
 from synca.mcp.common.tool.base import Tool
 from synca.mcp.common.types import (
+    ArgTuple,
+    CLIArgDict,
     CommandTuple,
     ResponseTuple,
     ResultDict)
@@ -14,7 +16,7 @@ from synca.mcp.common.types import (
 class CLITool(Tool):
     """Base class for MCP server tools."""
 
-    def __init__(self, ctx: Context, path: str, args: dict) -> None:
+    def __init__(self, ctx: Context, path: str, args: CLIArgDict) -> None:
         """Initialize the tool with context and path.
         """
         self.ctx = ctx
@@ -22,8 +24,8 @@ class CLITool(Tool):
         self._args = args
 
     @property
-    def args(self) -> dict:
-        return self._args
+    def args(self) -> ArgTuple:
+        return self._args.get("args", ()) or ()
 
     @cached_property
     def path(self) -> pathlib.Path:
