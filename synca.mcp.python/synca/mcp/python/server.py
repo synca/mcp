@@ -15,14 +15,14 @@ mcp = FastMCP("Python")
 @mcp.tool()
 async def pytest(
         ctx: Context,
-        path: str,
-        pytest_args: list[str] | None = None) -> ResultDict:
+        cwd: str,
+        pytest_args: tuple[str, ...] | None = None) -> ResultDict:
     """Run pytest on a Python project
 
     Executes pytest test runner on the specified project path.
 
     Args:
-        path: Directory path from which to run pytest (working directory)
+        cwd: Directory path from which to run pytest (working directory)
         pytest_args: Optional list of additional arguments to pass to pytest
 
     Returns:
@@ -49,20 +49,20 @@ async def pytest(
             "error": str | None
         }
     """
-    return await PytestTool(ctx, path).run(args=pytest_args)
+    return await PytestTool(ctx, cwd, dict(args=pytest_args)).run()
 
 
 @mcp.tool()
 async def mypy(
         ctx: Context,
-        path: str,
-        mypy_args: list[str] | None = None) -> ResultDict:
+        cwd: str,
+        mypy_args: tuple[str, ...] | None = None) -> ResultDict:
     """Run mypy type checker on a Python project
 
     Executes mypy type checker on the specified project path.
 
     Args:
-        path: Directory path from which to run mypy (working directory)
+        cwd: Directory path from which to run mypy (working directory)
         mypy_args: Optional list of additional arguments to pass to mypy
              Examples: ["--no-implicit-optional", "--disallow-untyped-defs",
                         "--disallow-incomplete-defs"]
@@ -81,13 +81,14 @@ async def mypy(
             "error": str | None
         }
     """
-    return await MypyTool(ctx, path).run(args=mypy_args)
+    return await MypyTool(ctx, cwd, dict(args=mypy_args)).run()
 
 
 @mcp.tool()
 async def flake8(
-        ctx: Context, path: str,
-        flake8_args: list[str] | None = None) -> ResultDict:
+        ctx: Context,
+        cwd: str,
+        flake8_args: tuple[str, ...] | None = None) -> ResultDict:
     """Run flake8 linter on a Python project
 
     Executes flake8 linter on the specified project path.
@@ -112,4 +113,4 @@ async def flake8(
         }
 
     """
-    return await Flake8Tool(ctx, path).run(args=flake8_args)
+    return await Flake8Tool(ctx, cwd, dict(args=flake8_args)).run()

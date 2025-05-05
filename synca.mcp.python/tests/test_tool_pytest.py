@@ -12,13 +12,15 @@ def test_tool_pytest_constructor():
     """Test PytestTool class initialization."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = PytestTool(ctx, path)
+    args = MagicMock()
+    tool = PytestTool(ctx, path, args)
     assert isinstance(tool, PytestTool)
     assert isinstance(tool, Tool)
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool.tool_name == "pytest"
     assert "tool_name" not in tool.__dict__
+    assert tool._args == args
 
 
 @pytest.mark.parametrize(
@@ -37,7 +39,8 @@ def test_tool_pytest_parse_output(
     """Test parse_output method with various combinations of inputs."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = PytestTool(ctx, path)
+    args = MagicMock()
+    tool = PytestTool(ctx, path, args)
     summary = {
         "total": 5,
         "passed": 3,
@@ -96,7 +99,8 @@ def test_tool_pytest_parse_coverage(patches, output):
     """Test _parse_coverage method with various inputs."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = PytestTool(ctx, path)
+    args = MagicMock()
+    tool = PytestTool(ctx, path, args)
     has_coverage = "Required test coverage" in output
     patched = patches(
         "CoverageParser",
@@ -159,6 +163,7 @@ def test_tool_pytest_parse_summary(output, expected_summary):
     """Test _parse_summary method with various inputs."""
     ctx = MagicMock()
     path = MagicMock()
-    tool = PytestTool(ctx, path)
+    args = MagicMock()
+    tool = PytestTool(ctx, path, args)
     result = tool._parse_summary(output)
     assert result == expected_summary
