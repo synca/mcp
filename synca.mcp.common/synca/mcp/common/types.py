@@ -4,8 +4,16 @@ from typing import TypeAlias, TypedDict, NotRequired
 
 
 CommandTuple: TypeAlias = tuple[str, ...]
-ExecutionTuple: TypeAlias = tuple[str, str, int]
+ResponseTuple: TypeAlias = tuple[str, str, int]
 IssuesTuple: TypeAlias = tuple[list[str], list[str], list[str]]
+
+
+class RequestDict(TypedDict):
+    method: str
+    endpoint: str
+    headers: NotRequired[dict[str, str] | None]
+    params: NotRequired[dict[str, str | int | float] | None]
+    payload: NotRequired[str | None]
 
 
 class StatusDict(TypedDict):
