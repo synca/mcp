@@ -17,10 +17,24 @@ def test_cli_tool_constructor():
     assert tool.ctx == ctx
     assert tool._path_str == path
     assert tool._args == args
-    assert tool.args == args
-    assert "args" not in tool.__dict__
     with pytest.raises(NotImplementedError):
         tool.tool_name
+
+
+@pytest.mark.parametrize(
+    "args",
+    [{}, dict(args="BOOM"), dict(args=None)])
+def test_cli_tool_args(patches, args):
+    """Test Tool path."""
+    ctx = MagicMock()
+    path = MagicMock()
+    tool = CLITool(ctx, path, args)
+
+    assert (
+        tool.args
+        == (args.get("args", ()) or ()))
+
+    assert "args" not in tool.__dict__
 
 
 def test_cli_tool_path(patches):

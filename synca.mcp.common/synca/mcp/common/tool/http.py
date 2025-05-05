@@ -17,7 +17,7 @@ class HTTPTool(Tool):
 
     @property
     def args(self) -> dict:
-        return self._args
+        raise NotImplementedError
 
     @property
     def request_data(self) -> RequestDict:

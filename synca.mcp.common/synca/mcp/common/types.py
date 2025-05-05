@@ -3,9 +3,14 @@
 from typing import TypeAlias, TypedDict, NotRequired
 
 
+ArgTuple: TypeAlias = tuple[str, ...]
 CommandTuple: TypeAlias = tuple[str, ...]
 ResponseTuple: TypeAlias = tuple[str, str, int]
 IssuesTuple: TypeAlias = tuple[list[str], list[str], list[str]]
+
+
+class CLIArgDict(TypedDict):
+    args: NotRequired[ArgTuple | None]
 
 
 class RequestDict(TypedDict):
