@@ -1,3 +1,5 @@
+from typing import Generic, TypeVar
+
 from mcp.server.fastmcp import Context
 
 from synca.mcp.common.tool.base import Tool
@@ -6,8 +8,10 @@ from synca.mcp.common.types import (
     ResponseTuple,
     ResultDict)
 
+T = TypeVar("T", bound=RequestDict)
 
-class HTTPTool(Tool):
+
+class HTTPTool(Tool, Generic[T]):
 
     def __init__(self, ctx: Context, args: dict) -> None:
         """Initialize the tool with context and path.
@@ -20,7 +24,7 @@ class HTTPTool(Tool):
         raise NotImplementedError
 
     @property
-    def request_data(self) -> RequestDict:
+    def request_data(self) -> T:
         """Build the request."""
         raise NotImplementedError
 
@@ -32,5 +36,5 @@ class HTTPTool(Tool):
 
     async def request(
             self,
-            params: RequestDict) -> ResponseTuple:
+            params: T) -> ResponseTuple:
         raise NotImplementedError
