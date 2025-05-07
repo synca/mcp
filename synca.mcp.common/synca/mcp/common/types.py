@@ -2,6 +2,7 @@
 
 from typing import TypeAlias, TypedDict, NotRequired
 
+from uritemplate import variable
 
 ArgTuple: TypeAlias = tuple[str, ...]
 CommandTuple: TypeAlias = tuple[str, ...]
@@ -17,8 +18,13 @@ class RequestDict(TypedDict):
     method: str
     endpoint: str
     headers: NotRequired[dict[str, str] | None]
-    params: NotRequired[dict[str, str | int | float] | None]
+    params: NotRequired[variable.VariableValueDict]
     payload: NotRequired[str | None]
+
+
+class APIRequestDict(RequestDict):
+    iterable_key: NotRequired[str | None]
+    pages: NotRequired[int | None]
 
 
 class StatusDict(TypedDict):
