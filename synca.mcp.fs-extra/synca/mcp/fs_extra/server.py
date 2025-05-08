@@ -18,7 +18,7 @@ mcp = FastMCP("FS-Extra")
 async def fs_head(
         ctx: Context,
         cwd: str,
-        head_args: tuple[str]) -> ResultDict:
+        head_args: tuple[str, ...]) -> ResultDict:
     """Display the beginning of a file.
 
     Wraps the Unix 'head' command to display the first part of files.
@@ -67,7 +67,7 @@ async def fs_head(
 async def fs_tail(
         ctx: Context,
         cwd: str,
-        tail_args: tuple[str]) -> ResultDict:
+        tail_args: tuple[str, ...]) -> ResultDict:
     """Display the end of a file.
 
     Wraps the Unix 'tail' command to display the last part of files.
@@ -117,7 +117,7 @@ async def fs_tail(
 async def fs_grep(
         ctx: Context,
         cwd: str,
-        grep_args: tuple[str]) -> ResultDict:
+        grep_args: tuple[str, ...]) -> ResultDict:
     """Search for patterns in a file or directory.
 
     Wraps the Unix 'grep' command to search for patterns in files.
@@ -170,7 +170,7 @@ async def fs_grep(
 async def fs_sed(
         ctx: Context,
         cwd: str,
-        sed_args: tuple[str]) -> ResultDict:
+        sed_args: tuple[str, ...]) -> ResultDict:
     """Perform text transformations on a file.
 
     Wraps the Unix 'sed' command to transform text in files and extract content.
