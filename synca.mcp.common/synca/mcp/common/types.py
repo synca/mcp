@@ -1,6 +1,6 @@
 """Type definitions for the MCP common package."""
 
-from typing import TypeAlias, TypedDict, NotRequired
+from typing import Any, Callable, TypeAlias, TypedDict, NotRequired
 
 from uritemplate import variable
 
@@ -88,3 +88,14 @@ class ResultDataDict(TypedDict):
 class ResultDict(TypedDict):
     data: NotRequired[ResultDataDict | None]
     error: NotRequired[str | None]
+
+
+class ArgConfig(TypedDict):
+    required: NotRequired[bool]
+    default: NotRequired[Any]
+    choices: NotRequired[list[Any]]
+    type: NotRequired[Callable[[Any], Any]]
+    help: NotRequired[str]
+
+
+ArgsDict: TypeAlias = dict[str, Any]
