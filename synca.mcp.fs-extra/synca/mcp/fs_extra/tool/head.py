@@ -15,6 +15,7 @@ class HeadTool(UnixSliceTool):
         parameter.
     """
     success_message = "Successfully read the beginning of file"
+    flags_with_args = ('-n', '--lines', '-c', '--bytes')
 
     @property
     def tool_name(self) -> str:

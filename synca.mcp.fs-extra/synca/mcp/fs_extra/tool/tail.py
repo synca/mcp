@@ -15,6 +15,7 @@ class TailTool(UnixSliceTool):
         parameter.
     """
     success_message = "Successfully read the end of file"
+    flags_with_args = ('-n', '--lines', '-c', '--bytes', '-f', '--follow')
 
     @property
     def tool_name(self) -> str:
