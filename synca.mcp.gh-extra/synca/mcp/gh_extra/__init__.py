@@ -1,0 +1,1 @@
+"""GitHub Extra MCP package."""
