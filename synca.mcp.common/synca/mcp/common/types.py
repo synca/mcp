@@ -99,3 +99,9 @@ class ArgConfig(TypedDict):
 
 
 ArgsDict: TypeAlias = dict[str, Any]
+
+
+class FileInfoDict(TypedDict):
+    path: str
+    size: int
+    modified: float
